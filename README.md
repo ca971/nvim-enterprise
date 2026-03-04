@@ -23,14 +23,12 @@ designed for professional developers and team environments.
 <br/>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/commands.png">
-  <source media="(prefers-color-scheme: light)" srcset="assets/commands.png">
-  <img src="assets/commands.png" alt="NvimEnterprise — Command Central" width="850" style="border-radius: 12px; border: 2px solid #30363d;">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/ca971nvim.png">
+  <source media="(prefers-color-scheme: light)" srcset="assets/ca971nvim.png">
+  <img src="assets/commands.png" alt="Nvim Enterprise — Dashboard" width="850" style="border-radius: 12px; border: 2px solid #30363d;">
 </picture>
 
-<sub>📸 Command Central — Interactive HUD for framework-wide management</sub>
-
-<br/><br/>
+<br/>
 
 [Features](#-key-features) •
 [Install](#-installation) •
