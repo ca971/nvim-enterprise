@@ -1,4 +1,3 @@
-```markdown
 <div align="center">
 
 # <img src="https://neovim.io/logos/neovim-mark.svg" width="42" height="42" alt="Neovim" /> NvimEnterprise
@@ -650,4 +649,3 @@ or commercial purposes.
 [![Forks](https://img.shields.io/github/forks/ca971/nvim-enterprise?style=social)](https://github.com/ca971/nvim-enterprise/fork)
 
 </div>
-```
