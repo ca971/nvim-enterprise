@@ -642,6 +642,7 @@ or commercial purposes.
 
 [⬆ Back to Top](#-nvimenterprise)
 
+[![Release](https://img.shields.io/github/v/release/ca971/nvim-enterprise?style=social&logo=github)](https://github.com/ca971/nvim-enterprise/releases/latest)
 [![Stars](https://img.shields.io/github/stars/ca971/nvim-enterprise?style=social)](https://github.com/ca971/nvim-enterprise)
 [![Issues](https://img.shields.io/github/issues/ca971/nvim-enterprise?style=social)](https://github.com/ca971/nvim-enterprise/issues)
 [![Forks](https://img.shields.io/github/forks/ca971/nvim-enterprise?style=social)](https://github.com/ca971/nvim-enterprise/fork)
