@@ -1,4 +1,3 @@
-```markdown
 # Contributing to NvimEnterprise
 
 First off, **thank you** for considering contributing to NvimEnterprise! 🎉
@@ -584,4 +583,3 @@ Any other context, mockups, or screenshots.
 Every contribution — no matter how small — is valued and appreciated.
 
 </div>
-```
