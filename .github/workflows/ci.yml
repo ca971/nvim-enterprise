@@ -1,0 +1,99 @@
+# ~/.config/nvim/.github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install StyLua
+        uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --check lua/
+
+      - name: Check for backup files
+        run: |
+          found=$(find . -type f \( -name "*.bak" -o -name "*.old" -o -name "*.last" \) | head -20)
+          if [ -n "$found" ]; then
+            echo "❌ Backup files found:"
+            echo "$found"
+            exit 1
+          fi
+          echo "✅ No backup files found"
+
+  startup:
+    name: Neovim Startup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: v0.10.4
+
+      - name: Validate Lua syntax
+        run: |
+          errors=0
+          while IFS= read -r file; do
+            if ! luac -p "$file" 2>/tmp/err.log; then
+              echo "❌ $file"
+              cat /tmp/err.log
+              errors=$((errors + 1))
+            fi
+          done < <(find lua -name "*.lua")
+          if [ "$errors" -gt 0 ]; then
+            echo "❌ $errors file(s) with syntax errors"
+            exit 1
+          fi
+          echo "✅ All Lua files valid"
+
+      - name: Test Neovim startup
+        run: |
+          export HOME=$(mktemp -d)
+          mkdir -p $HOME/.config
+          ln -s $GITHUB_WORKSPACE $HOME/.config/nvim
+          nvim --headless -c "quitall" 2>&1 | tee /tmp/startup.log
+          echo "✅ Neovim started successfully"
+
+  # ── CD : Release automatique quand tu push un tag ──
+  release:
+    name: Create Release
+    needs: [lint, startup] # Ne lance QUE si CI passe
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          previous_tag=$(git tag --sort=-v:refname | sed -n '2p')
+          if [ -n "$previous_tag" ]; then
+            echo "changes<<EOF" >> $GITHUB_OUTPUT
+            git log ${previous_tag}..HEAD --pretty=format:"- %s" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          make_latest: true
