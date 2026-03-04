@@ -1,0 +1,85 @@
+---@file lua/users/default/settings.lua
+---@description Default user settings — inherits all values from root settings.lua
+---@module "users.default.settings"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see core.settings          Base settings system (merged with user overrides)
+---@see users.namespace        Namespace loader that calls this file
+---@see users.init             User loading orchestration
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  users/default/settings.lua — Default user settings                      ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  Merge chain:                                                    │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  ┌────────────────────┐   deep merge   ┌──────────────────┐      │    ║
+--- ║  │  │  settings.lua      │ ◄──────────────│  user/settings   │      │    ║
+--- ║  │  │  (root defaults)   │                │  (this file)     │      │    ║
+--- ║  │  │  colorscheme: toky │                │  {} = no change  │      │    ║
+--- ║  │  │  languages: [...]  │                │                  │      │    ║
+--- ║  │  │  editor: {...}     │                │                  │      │    ║
+--- ║  │  └────────────────────┘                └──────────────────┘      │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  The default user inherits ALL root settings as-is.              │    ║
+--- ║  │  This file returns an empty table — no overrides applied.        │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Override rules:                                                 │    ║
+--- ║  │  ├─ Only include keys you want to change                         │    ║
+--- ║  │  ├─ Nested tables are deep-merged (not replaced)                 │    ║
+--- ║  │  ├─ Lists (arrays) are replaced entirely                         │    ║
+--- ║  │  └─ nil values are ignored (cannot unset a root default)         │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Examples (uncomment to activate):                               │    ║
+--- ║  │  ├─ Change colorscheme:  ui.colorscheme = "catppuccin"           │    ║
+--- ║  │  ├─ Change font size:    ui.font_size = 16                       │    ║
+--- ║  │  ├─ Toggle feature:      editor.relative_number = false          │    ║
+--- ║  │  └─ Enable language:     languages.enabled = { "python", "go" }  │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  Optimizations:                                                          ║
+--- ║  • Empty table = zero overhead at merge time                             ║
+--- ║  • File is only loaded once at startup via users/init.lua                ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- USER SETTINGS OVERRIDES
+--
+-- The default user inherits everything from root settings.lua.
+-- Only add keys here if you want to override specific values.
+--
+-- Available override categories (see core/settings.lua for full schema):
+--
+--   ui = {
+--     colorscheme = "catppuccin",       -- override colorscheme
+--     font_size = 16,                   -- override font size
+--   },
+--
+--   editor = {
+--     relative_number = false,          -- disable relative line numbers
+--     wrap = true,                      -- enable word wrap
+--     tab_width = 2,                    -- change indentation width
+--   },
+--
+--   languages = {
+--     enabled = { "python", "go" },     -- override enabled languages
+--   },
+--
+--   ai = {
+--     enabled = true,                   -- enable AI assistant
+--     provider = "copilot",             -- set AI provider
+--   },
+--
+--   performance = {
+--     git_protocol = "ssh",             -- use SSH for git operations
+--   },
+-- ═══════════════════════════════════════════════════════════════════════
+
+---@type NvimEnterpriseSettings
+return {
+	-- Empty: default user inherits all root settings unchanged.
+}

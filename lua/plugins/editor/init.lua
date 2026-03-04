@@ -1,0 +1,25 @@
+---@file lua/plugins/editor/init.lua
+---@description Editor plugins entry point — loaded via lazy.nvim directory import
+---@module "plugins.editor"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+--- This file returns an empty table. Lazy.nvim imports all sibling
+--- `*.lua` files in this directory automatically when configured with:
+---
+--- ```lua
+--- { import = "plugins.editor" }
+--- ```
+---
+--- Individual plugin specs are defined in their own files:
+---   • persisted.lua    — Session management (git-aware)
+---   • neo-tree.lua     — File explorer (tree-style)
+---   • oil.lua          — File explorer (buffer-style)
+---   • neogit.lua       — Magit-like Git interface
+---   • todo-comments.lua — TODO/FIX/HACK highlighting
+---   • trouble.lua      — Diagnostics & quickfix viewer
+---   • which-key.lua    — Keymap discovery popup
+
+return {}

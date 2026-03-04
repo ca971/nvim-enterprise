@@ -1,0 +1,51 @@
+---@file lua/plugins/code/lsp/init.lua
+---@description LSP — Language Server Protocol subsystem entry point and module index
+---@module "plugins.code.lsp"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see plugins.code.lsp.lspconfig Server configurations, on_attach, capabilities
+---@see plugins.code.lsp.mason Tool installer and mason-lspconfig bridge
+---@see plugins.code.lsp.handlers Diagnostic UI, float borders, signs, progress tracking
+---@see plugins.code Code intelligence aggregator
+---@see core.settings Settings singleton (lsp.* settings)
+---@see langs Language modules (each configures LSP servers via lspconfig + mason)
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  plugins/code/lsp/init.lua — LSP subsystem entry point                   ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  This file is a no-op — it exists for documentation and as the   │    ║
+--- ║  │  lazy.nvim import entry point for the lsp/ directory.            │    ║
+--- ║  │  Individual plugin specs live in their own files:                │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  plugins/code/lsp/                                               │    ║
+--- ║  │  ├─ lspconfig.lua   nvim-lspconfig setup                         │    ║
+--- ║  │  │  ├─ Server configurations per language                        │    ║
+--- ║  │  │  ├─ Global on_attach (keymaps, inlay hints, codelens)         │    ║
+--- ║  │  │  ├─ Capabilities (cmp-nvim-lsp enhanced)                      │    ║
+--- ║  │  │  └─ Per-server opts merging from langs/*.lua                  │    ║
+--- ║  │  │                                                               │    ║
+--- ║  │  ├─ mason.lua       mason.nvim + mason-lspconfig                 │    ║
+--- ║  │  │  ├─ Tool installer (LSP, DAP, linters, formatters)            │    ║
+--- ║  │  │  ├─ Deferred auto-install from langs/*.lua opts_extend        │    ║
+--- ║  │  │  └─ mason-lspconfig bridge (automatic_install = false)        │    ║
+--- ║  │  │                                                               │    ║
+--- ║  │  └─ handlers.lua    Diagnostic UI and float borders              │    ║
+--- ║  │     ├─ vim.diagnostic.config (signs, virtual_text, float)        │    ║
+--- ║  │     ├─ LSP float borders (hover, signatureHelp)                  │    ║
+--- ║  │     ├─ LSP progress tracker (_G.NvimConfig.lsp_progress)         │    ║
+--- ║  │     └─ CursorHold diagnostic float                               │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  Design decisions:                                                       ║
+--- ║  ├─ Returns {} — lazy.nvim scans sibling files for actual specs          ║
+--- ║  ├─ Split into 3 files for separation of concerns:                       ║
+--- ║  │  lspconfig = server logic, mason = installation, handlers = UI        ║
+--- ║  └─ Each file is independently testable and documentable                 ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+return {}

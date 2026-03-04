@@ -1,0 +1,104 @@
+---@file lua/plugins/init.lua
+---@description Plugins — plugin layer documentation and category index
+---@module "plugins"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see config.plugin_manager PluginManager collects specs from all plugin subdirectories
+---@see config.lazy lazy.nvim bootstrap (receives collected specs, NOT this file)
+---@see core.settings Settings singleton (plugins.disabled, per-plugin .enabled flags)
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  plugins/init.lua — Plugin layer documentation and category index        ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  This file is NOT imported by lazy.nvim — it exists solely as    │    ║
+--- ║  │  a documentation and utility module. Plugin specs are collected  │    ║
+--- ║  │  by config.plugin_manager which scans the subdirectories.        │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Plugin categories:                                              │    ║
+--- ║  │  ┌────────────────────────────────────────────────────────────┐  │    ║
+--- ║  │  │  plugins/ui/           Visual components                   │  │    ║
+--- ║  │  │  ├─ lualine            Statusline                          │  │    ║
+--- ║  │  │  ├─ bufferline         Buffer/tab line                     │  │    ║
+--- ║  │  │  ├─ dashboard          Startup dashboard                   │  │    ║
+--- ║  │  │  ├─ noice              UI replacement (cmdline, messages)  │  │    ║
+--- ║  │  │  ├─ dressing           vim.ui.input/select enhancement     │  │    ║
+--- ║  │  │  ├─ indent-blankline   Indentation guides                  │  │    ║
+--- ║  │  │  ├─ mini-icons         File type icons                     │  │    ║
+--- ║  │  │  ├─ colorschemes       Colorscheme plugins                 │  │    ║
+--- ║  │  │  ├─ snacks             Utility collection (notify, etc.)   │  │    ║
+--- ║  │  │  ├─ tiny-inline-diag.  Enhanced inline diagnostics         │  │    ║
+--- ║  │  │  ├─ no-neck-pain       Zen/centered mode                   │  │    ║
+--- ║  │  │  └─ presenting         Slide presentations                 │  │    ║
+--- ║  │  │                                                            │  │    ║
+--- ║  │  │  plugins/editor/       Editing enhancements                │  │    ║
+--- ║  │  │  ├─ telescope          Fuzzy finder                        │  │    ║
+--- ║  │  │  ├─ neo-tree           File explorer sidebar               │  │    ║
+--- ║  │  │  ├─ oil                Buffer-based file manager           │  │    ║
+--- ║  │  │  ├─ harpoon            Quick file mark navigation          │  │    ║
+--- ║  │  │  ├─ which-key          Keymap discovery popup              │  │    ║
+--- ║  │  │  ├─ flash              Search label navigation             │  │    ║
+--- ║  │  │  ├─ gitsigns           In-buffer git indicators            │  │    ║
+--- ║  │  │  ├─ neogit             Magit-like git interface            │  │    ║
+--- ║  │  │  ├─ diffview           Git diff viewer                     │  │    ║
+--- ║  │  │  ├─ grug-far           Project-wide search & replace       │  │    ║
+--- ║  │  │  ├─ mini               Mini.nvim modules (pairs, etc.)     │  │    ║
+--- ║  │  │  ├─ mini-align         Text alignment                      │  │    ║
+--- ║  │  │  ├─ markview           Markdown preview                    │  │    ║
+--- ║  │  │  ├─ persisted          Session management                  │  │    ║
+--- ║  │  │  ├─ todo-comments      TODO/FIXME highlighting             │  │    ║
+--- ║  │  │  └─ trouble            Diagnostics list                    │  │    ║
+--- ║  │  │                                                            │  │    ║
+--- ║  │  │  plugins/code/         Code intelligence                   │  │    ║
+--- ║  │  │  ├─ lsp/               LSP subsystem                       │  │    ║
+--- ║  │  │  │  ├─ lspconfig       Server configurations               │  │    ║
+--- ║  │  │  │  ├─ mason            Server installation                │  │    ║
+--- ║  │  │  │  └─ handlers        Custom LSP handlers                 │  │    ║
+--- ║  │  │  ├─ cmp                Completion engine                   │  │    ║
+--- ║  │  │  ├─ treesitter         Syntax highlighting & text objects  │  │    ║
+--- ║  │  │  ├─ conform            Code formatting                     │  │    ║
+--- ║  │  │  ├─ nvim-lint          Asynchronous linting                │  │    ║
+--- ║  │  │  ├─ lazydev            Neovim Lua development              │  │    ║
+--- ║  │  │  └─ dap                Debug adapter protocol              │  │    ║
+--- ║  │  │                                                            │  │    ║
+--- ║  │  │  plugins/ai/           AI assistants                       │  │    ║
+--- ║  │  │  ├─ avante             AI code assistant (multi-provider)  │  │    ║
+--- ║  │  │  └─ codecompanion      AI companion (chat, inline, cmds)   │  │    ║
+--- ║  │  │                                                            │  │    ║
+--- ║  │  │  plugins/tools/        Developer tools                     │  │    ║
+--- ║  │  │  ├─ toggleterm         Terminal management                 │  │    ║
+--- ║  │  │  └─ lazygit            LazyGit integration                 │  │    ║
+--- ║  │  │                                                            │  │    ║
+--- ║  │  │  plugins/misc/         Miscellaneous                       │  │    ║
+--- ║  │  │  ├─ wakatime           Coding activity tracker             │  │    ║
+--- ║  │  │  └─ vim-startuptime    Startup profiler                    │  │    ║
+--- ║  │  │                                                            │  │    ║
+--- ║  │  │  plugins/lazyvim_extras/  LazyVim compatibility            │  │    ║
+--- ║  │  │  ├─ extras_loader      Dynamic extras importer             │  │    ║
+--- ║  │  │  └─ init               Entry point for extras              │  │    ║
+--- ║  │  └────────────────────────────────────────────────────────────┘  │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  How plugin loading works:                                       │    ║
+--- ║  │  ┌────────────────────────────────────────────────────────────┐  │    ║
+--- ║  │  │  1. config.plugin_manager scans plugins/ subdirectories    │  │    ║
+--- ║  │  │  2. Each .lua file returns a lazy.PluginSpec (or array)    │  │    ║
+--- ║  │  │  3. Guard checks (settings:is_plugin_enabled) at top of    │  │    ║
+--- ║  │  │     each file → return {} to skip disabled plugins         │  │    ║
+--- ║  │  │  4. Specs are aggregated with lang/ and user/ specs        │  │    ║
+--- ║  │  │  5. Full spec list passed to lazy.setup() in config.lazy   │  │    ║
+--- ║  │  └────────────────────────────────────────────────────────────┘  │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  Design decisions:                                                       ║
+--- ║  ├─ This file returns {} — it is a no-op, purely documentation           ║
+--- ║  ├─ Plugin specs live in individual files, not aggregated here           ║
+--- ║  ├─ plugin_manager handles discovery — no manual import list needed      ║
+--- ║  ├─ Each plugin file is self-contained (guard + deps + keys + opts)      ║
+--- ║  └─ Category directories mirror the which-key group structure            ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+return {}

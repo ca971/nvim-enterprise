@@ -1,0 +1,60 @@
+---@file lua/plugins/ui/init.lua
+---@description UI plugins — Entry point for lazy.nvim import (intentionally empty)
+---@module "plugins.ui"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see plugins.ui.bufferline           Buffer tabline with LSP diagnostics
+---@see plugins.ui.colorschemes         Empty placeholder (specs are dynamic)
+---@see plugins.ui.dressing             vim.ui.input() and vim.ui.select() overrides
+---@see plugins.ui.indent-blankline     Indentation guides with treesitter scope
+---@see plugins.ui.lualine              Power-user statusline information center
+---@see plugins.ui.noice                Command line, notifications, and LSP UI
+---@see plugins.ui.snacks               Swiss-army knife (picker, notifier, terminal, git)
+---@see plugins.ui.tiny-inline-diagnostic Inline diagnostic renderer
+---@see config.lazy                     Lazy.nvim setup (imports plugins/ui/ directory)
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  plugins/ui/init.lua — UI plugin group entry point                       ║
+--- ║                                                                          ║
+--- ║  This file is intentionally empty.                                       ║
+--- ║                                                                          ║
+--- ║  Why this file exists:                                                   ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  lazy.nvim uses `{ import = "plugins.ui" }` in its spec list.    │    ║
+--- ║  │  This triggers a directory scan of lua/plugins/ui/*.lua.         │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  init.lua is loaded first by Lua's module resolution.            │    ║
+--- ║  │  It must return {} (empty spec) so lazy.nvim continues           │    ║
+--- ║  │  scanning sibling files for actual plugin specs.                 │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Roles:                                                          │    ║
+--- ║  │  1. Satisfies Lua's require("plugins.ui") resolution             │    ║
+--- ║  │  2. Returns {} so lazy.nvim finds no specs here                  │    ║
+--- ║  │  3. Documents the UI plugin group for new contributors           │    ║
+--- ║  │  4. Prevents accidental placement of specs in init.lua           │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  UI Plugin Group (8 specs in sibling files):                             ║
+--- ║  ┌──────────────────────────┬────────────────────────────────────┐       ║
+--- ║  │  File                    │  Plugin                            │       ║
+--- ║  ├──────────────────────────┼────────────────────────────────────┤       ║
+--- ║  │  bufferline.lua          │  akinsho/bufferline.nvim           │       ║
+--- ║  │  colorschemes.lua        │  (empty — dynamic specs)           │       ║
+--- ║  │  dressing.lua            │  stevearc/dressing.nvim            │       ║
+--- ║  │  indent-blankline.lua    │  lukas-reineke/indent-blankline    │       ║
+--- ║  │  lualine.lua             │  nvim-lualine/lualine.nvim         │       ║
+--- ║  │  noice.lua               │  folke/noice.nvim                  │       ║
+--- ║  │  snacks.lua              │  folke/snacks.nvim                 │       ║
+--- ║  │  tiny-inline-diagnostic  │  rachartier/tiny-inline-diagnostic │       ║
+--- ║  └──────────────────────────┴────────────────────────────────────┘       ║
+--- ║                                                                          ║
+--- ║  To add a new UI plugin:                                                 ║
+--- ║  • Create a new .lua file in this directory (not here)                   ║
+--- ║  • Return a lazy.nvim spec table from that file                          ║
+--- ║  • It will be auto-discovered by lazy.nvim's import scan                 ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+return {}

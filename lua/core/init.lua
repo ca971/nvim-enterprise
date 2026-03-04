@@ -1,0 +1,37 @@
+---@file lua/core/init.lua
+---@description Core entry point — delegates to the bootstrap sequence
+---@module "core.init"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see core.bootstrap Bootstrap pipeline (platform → settings → options → plugins → keymaps → autocmds)
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  core/init.lua — Core module entry point                                 ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  init.lua (root)                                                 │    ║
+--- ║  │  │                                                               │    ║
+--- ║  │  └─▶ require("core")                                             │    ║
+--- ║  │      │                                                           │    ║
+--- ║  │      └─▶ core/init.lua (this file)                               │    ║
+--- ║  │          │                                                       │    ║
+--- ║  │          └─▶ core.bootstrap.run()                                │    ║
+--- ║  │              │                                                   │    ║
+--- ║  │              ├─ Step 1: core.platform                            │    ║
+--- ║  │              ├─ Step 2: core.settings                            │    ║
+--- ║  │              ├─ Step 3: core.options                             │    ║
+--- ║  │              ├─ Step 4: config (lazy.nvim + plugins)             │    ║
+--- ║  │              ├─ Step 5: core.keymaps                             │    ║
+--- ║  │              └─ Step 6: core.autocmds                            │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  This file is intentionally minimal: a single require call.              ║
+--- ║  All logic lives in core.bootstrap to keep the entry point clean         ║
+--- ║  and to allow bootstrap to be tested or re-invoked independently.        ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+require("core.bootstrap").run()

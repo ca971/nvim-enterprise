@@ -1,0 +1,188 @@
+# @file        stylua.toml
+# @description StyLua — Enterprise-grade Lua formatting rules
+# @author      ca971
+# @license     MIT
+# @version     1.0.0
+# @since       2026-01
+#
+# @see         https://github.com/JohnnyMorganz/StyLua#options
+# @see         https://johnnymorganz.github.io/StyLua/playground
+# @see         lua/plugins/conform.lua        Formatter integration (conform.nvim)
+# @see         lua/core/options.lua            Neovim tabstop/shiftwidth (must match indent_width)
+# @see         .editorconfig                   Editor-level formatting rules (if present)
+#
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  stylua.toml — StyLua formatter configuration                            ║
+# ║                                                                          ║
+# ║  Auto-detected by StyLua from the project root.                          ║
+# ║  No args needed in conform.nvim — this file IS the config.               ║
+# ║                                                                          ║
+# ║  Settings Overview:                                                      ║
+# ║  ┌────────────────────────────────┬─────────────────────────────────┐    ║
+# ║  │  Setting                       │  Value                          │    ║
+# ║  ├────────────────────────────────┼─────────────────────────────────┤    ║
+# ║  │  column_width                  │  120                            │    ║
+# ║  │  line_endings                  │  Unix (\n)                      │    ║
+# ║  │  indent_type                   │  Tabs                           │    ║
+# ║  │  indent_width                  │  2 (for column calculation)     │    ║
+# ║  │  quote_style                   │  AutoPreferDouble               │    ║
+# ║  │  call_parentheses              │  Always                         │    ║
+# ║  │  collapse_simple_statement     │  ConditionalOnly                │    ║
+# ║  │  sort_requires.enabled         │  false                          │    ║
+# ║  └────────────────────────────────┴─────────────────────────────────┘    ║
+# ║                                                                          ║
+# ║  Design Principles:                                                      ║
+# ║  • Consistency over personal preference                                  ║
+# ║  • Minimal diff churn on first adoption                                  ║
+# ║  • Accessibility-friendly (tabs for variable-width rendering)            ║
+# ║  • Aligned with Neovim ecosystem conventions (folke, mini.nvim)          ║
+# ║  • Every choice documented with rationale and rejected alternatives      ║
+# ║                                                                          ║
+# ║  Dependency Chain:                                                       ║
+# ║  ┌─────────────────────────────────────────────────────────────────┐     ║
+# ║  │  conform.nvim → detects stylua binary → reads this file         │     ║
+# ║  │  core/options.lua → tabstop=2, shiftwidth=2 (must match)        │     ║
+# ║  │  CI/CD → runs `stylua --check .` against this config            │     ║
+# ║  └─────────────────────────────────────────────────────────────────┘     ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN WIDTH
+#
+# 120 is the sweet spot for Neovim configs:
+# • 80: too narrow — forces excessive line breaks in nested callbacks
+#        and plugin specs (lazy.nvim tables go 3-4 levels deep)
+# • 100: workable but tight for function signatures with annotations
+# • 120: matches most modern monitors at reasonable font sizes
+#         (14pt on a 1440p display shows ~140 columns comfortably)
+# • 140+: too wide — horizontal scrolling on laptops, hard to diff
+#
+# This matches: rustfmt (100), black/ruff (88→120), prettier (80→120),
+# Google Java Style (100), Linux kernel (80→100).
+# ═══════════════════════════════════════════════════════════════════════════
+column_width = 120
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LINE ENDINGS
+#
+# "Unix" (\n) everywhere. Even on Windows, Neovim and Git normalize
+# to LF. Using "Windows" (\r\n) causes:
+# • Git diffs with ^M artifacts
+# • Treesitter parse errors on some grammars
+# • Inconsistent behavior across OS in CI/CD
+# ═══════════════════════════════════════════════════════════════════════════
+line_endings = "Unix"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# INDENTATION
+#
+# Tabs vs Spaces — the eternal debate. Tabs are the RIGHT choice for
+# Neovim configs because:
+#
+# 1. Accessibility: users with visual impairments can set tab width
+#    to whatever they need (2, 4, 8) without changing the file
+# 2. Neovim convention: Neovim's own source uses tabs for C and
+#    many core plugin authors use tabs for Lua
+# 3. Smaller file size: 1 byte per indent level vs 2-4 bytes
+# 4. Consistent intent: tab = "indent one level", not "n spaces"
+# 5. Git: smaller diffs when indentation changes
+#
+# indent_width = 2: controls how StyLua CALCULATES line length.
+# With tabs, this doesn't affect the rendered width (that's your
+# editor's tabstop setting), but it tells StyLua "treat one tab
+# as 2 columns when computing column_width wrapping decisions."
+#
+# This matches your Neovim config: tabstop=2, shiftwidth=2.
+# ═══════════════════════════════════════════════════════════════════════════
+indent_type = "Tabs"
+indent_width = 2
+
+# ═══════════════════════════════════════════════════════════════════════════
+# QUOTE STYLE
+#
+# "AutoPreferDouble" is the power-user choice:
+# • Normalizes NEW strings to double quotes (consistency)
+# • Preserves existing single quotes where already used
+#   (no churn in diffs when you first apply StyLua to a large codebase)
+# • Double quotes are the Lua convention per PUC-Rio style
+# • Matches: Neovim source, LuaLS, LazyVim, most plugin authors
+#
+# Alternatives and why NOT:
+# • "ForceDouble": causes massive diff churn on first run
+# • "ForceSingle": conflicts with Lua convention, confusing in
+#                   strings containing apostrophes ('it\'s' vs "it's")
+# • "AutoPreferSingle": valid but less conventional in Lua ecosystem
+# ═══════════════════════════════════════════════════════════════════════════
+quote_style = "AutoPreferDouble"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FUNCTION CALL PARENTHESES
+#
+# "Always" enforces parentheses on ALL function calls:
+#   require "foo"    →  require("foo")
+#   print "hello"    →  print("hello")
+#   vim.cmd "edit"   →  vim.cmd("edit")
+#
+# Why "Always" and not "None" or "NoSingleString":
+# • Consistency: mixed styles (with/without parens) are confusing
+# • Grep-ability: `require("foo")` is easier to search than `require "foo"`
+# • LSP: some language servers handle parenthesized calls better
+# • LuaJIT: no performance difference either way
+# • Convention: Neovim core, LazyVim, and most modern plugins use parens
+#
+# "NoSingleString" is tempting but creates inconsistency:
+#   require("foo")        -- has parens (multiple args possible)
+#   vim.cmd "normal! gg"  -- no parens (single string)
+#   vim.cmd("edit")       -- has parens (why different from above?)
+# ═══════════════════════════════════════════════════════════════════════════
+call_parentheses = "Always"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLLAPSE SIMPLE STATEMENTS
+#
+# "ConditionalOnly" collapses ONLY simple if/elseif/else to one line:
+#
+#   -- BEFORE (expanded):
+#   if ok then
+#       return value
+#   end
+#
+#   -- AFTER (collapsed):
+#   if ok then return value end
+#
+# But does NOT collapse:
+#   • Function bodies (always expanded for readability)
+#   • Loops (always expanded — side effects should be visible)
+#   • Multi-statement blocks (only single-expression bodies)
+#
+# Why "ConditionalOnly" and not "Always" or "Never":
+# • "Always": collapses function() return x end to one line,
+#   which harms readability in callback-heavy plugin configs
+# • "Never": wastes vertical space on trivial guard clauses
+#   like `if not ok then return end`
+# • "ConditionalOnly": perfect balance — collapses guards,
+#   expands everything else
+#
+# This matches the style used by folke, LazyVim, and mini.nvim.
+# ═══════════════════════════════════════════════════════════════════════════
+collapse_simple_statement = "ConditionalOnly"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SORT REQUIRES
+#
+# DISABLED. In Neovim configs, require() order often matters:
+#
+#   local settings = require("core.settings")   -- must be first
+#   if not settings:is_plugin_enabled("x") then  -- early return
+#       return {}
+#   end
+#   local icons = require("core.icons")          -- only load if enabled
+#
+# Auto-sorting would move `icons` before `settings`, breaking the
+# early-return guard pattern used in every file of this config.
+#
+# For application Lua code (not Neovim configs), you might want
+# to enable this. But for plugin configs: NEVER.
+# ═══════════════════════════════════════════════════════════════════════════
+[sort_requires]
+enabled = false

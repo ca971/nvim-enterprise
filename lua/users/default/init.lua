@@ -1,0 +1,115 @@
+---@file lua/users/default/init.lua
+---@description Default user namespace — post-plugin customization entry point
+---@module "users.default"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see users.init              User loading orchestration (calls M.setup())
+---@see users.namespace         Namespace resolution and load_init() caller
+---@see users.default.settings  User settings overrides (loaded before this)
+---@see users.default.keymaps   User keymaps (loaded before this)
+---@see core.settings           Base settings system
+---@see core.keymaps            Centralized keymap registry
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  users/default/init.lua — Default user post-plugin customization         ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  Loading order (this file runs LAST in the user chain):          │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  ┌──────────────────┐                                            │    ║
+--- ║  │  │  core/settings   │  ← base defaults                           │    ║
+--- ║  │  └────────┬─────────┘                                            │    ║
+--- ║  │           ▼                                                      │    ║
+--- ║  │  ┌──────────────────┐                                            │    ║
+--- ║  │  │  user/settings   │  ← user overrides merged in                │    ║
+--- ║  │  └────────┬─────────┘                                            │    ║
+--- ║  │           ▼                                                      │    ║
+--- ║  │  ┌──────────────────┐                                            │    ║
+--- ║  │  │  core/keymaps    │  ← default keymaps                         │    ║
+--- ║  │  └────────┬─────────┘                                            │    ║
+--- ║  │           ▼                                                      │    ║
+--- ║  │  ┌──────────────────┐                                            │    ║
+--- ║  │  │  user/keymaps    │  ← user keymaps (can shadow defaults)      │    ║
+--- ║  │  └────────┬─────────┘                                            │    ║
+--- ║  │           ▼                                                      │    ║
+--- ║  │  ┌──────────────────┐                                            │    ║
+--- ║  │  │  lazy.nvim       │  ← all plugins loaded (incl. user specs)   │    ║
+--- ║  │  └────────┬─────────┘                                            │    ║
+--- ║  │           ▼                                                      │    ║
+--- ║  │  ┌──────────────────┐                                            │    ║
+--- ║  │  │  user/init.lua   │  ← THIS FILE (runs last, full access)      │    ║
+--- ║  │  └──────────────────┘                                            │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  At this point, everything is available:                         │    ║
+--- ║  │  ├─ All plugins are loaded and configured                        │    ║
+--- ║  │  ├─ All keymaps (core + user) are registered                     │    ║
+--- ║  │  ├─ All settings (core + user) are merged                        │    ║
+--- ║  │  ├─ LSP clients may be attaching or already attached             │    ║
+--- ║  │  └─ Treesitter parsers are available                             │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  The default user uses all settings as-is — M.setup() is         │    ║
+--- ║  │  a no-op. Override in other user namespaces for customization.   │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Typical use cases for M.setup():                                │    ║
+--- ║  │  ├─ Custom highlight group overrides                             │    ║
+--- ║  │  ├─ Buffer-local autocmds (per-user workflows)                   │    ║
+--- ║  │  ├─ Plugin integration tweaks (statusline, dashboard)            │    ║
+--- ║  │  ├─ Environment-specific logic (SSH, tmux, GUI)                  │    ║
+--- ║  │  └─ Workspace-specific settings (monorepo, project type)         │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  Optimizations:                                                          ║
+--- ║  • Empty setup = zero overhead (no API calls)                            ║
+--- ║  • File is only loaded once at startup via users/init.lua                ║
+--- ║  • M.setup() pattern allows conditional logic based on runtime state     ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- MODULE
+-- ═══════════════════════════════════════════════════════════════════════
+
+local M = {}
+
+--- Post-plugin initialization for the default user.
+---
+--- Called by `users/namespace.lua` via `load_init()` **after** all plugins
+--- have been loaded by lazy.nvim. At this point, every plugin API is
+--- available for configuration and customization.
+---
+--- The default user uses all settings from root `settings.lua` without
+--- any additional customization. This function is intentionally a no-op.
+---
+--- Override in other user namespaces for per-user customization:
+---
+--- ```lua
+--- -- In lua/users/alice/init.lua:
+--- function M.setup()
+---   local platform = require("core.platform")
+---
+---   -- Custom highlight for Alice's preferred style
+---   vim.api.nvim_set_hl(0, "CursorLine", { bg = "#1a1b26" })
+---
+---   -- SSH-specific tweaks
+---   if platform.is_ssh then
+---     vim.o.mouse = ""           -- disable mouse over SSH
+---     vim.o.clipboard = ""       -- don't try system clipboard
+---   end
+---
+---   -- Auto-format on save for Alice's projects
+---   vim.api.nvim_create_autocmd("BufWritePre", {
+---     pattern = { "*.lua", "*.py" },
+---     callback = function()
+---       vim.lsp.buf.format({ async = false })
+---     end,
+---   })
+--- end
+--- ```
+function M.setup()
+	-- The default user inherits all core configuration unchanged.
+end
+
+return M

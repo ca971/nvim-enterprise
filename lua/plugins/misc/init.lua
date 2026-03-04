@@ -1,0 +1,39 @@
+---@file lua/plugins/misc/init.lua
+---@description Misc — miscellaneous plugins entry point and module index
+---@module "plugins.misc"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see plugins.misc.wakatime Coding activity tracker (WakaTime service)
+---@see plugins.misc.vim-startuptime Boot performance profiler (:StartupTime)
+---@see plugins Plugin layer documentation and category index
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  plugins/misc/init.lua — Miscellaneous plugins entry point               ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  This file is a no-op — it exists for documentation and as the   │    ║
+--- ║  │  lazy.nvim import entry point for the misc/ directory.           │    ║
+--- ║  │  Individual plugin specs live in their own files:                │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  plugins/misc/                                                   │    ║
+--- ║  │  ├─ wakatime.lua          Coding time tracking (background)      │    ║
+--- ║  │  │  └─ Disabled by default (plugins.wakatime.enabled = false)    │    ║
+--- ║  │  │                                                               │    ║
+--- ║  │  └─ vim-startuptime.lua   Boot profiler (:StartupTime)           │    ║
+--- ║  │     └─ Disabled by default (plugins.startuptime.enabled = false) │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Both plugins are diagnostic/auxiliary tools with zero runtime   │    ║
+--- ║  │  overhead when disabled, and minimal overhead when enabled.      │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  Design decisions:                                                       ║
+--- ║  ├─ Returns {} — lazy.nvim scans sibling files for actual specs          ║
+--- ║  ├─ Both plugins disabled by default (opt-in via settings)               ║
+--- ║  └─ No aggregation logic needed — lazy.nvim handles file discovery       ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+return {}

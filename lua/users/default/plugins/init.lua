@@ -1,0 +1,100 @@
+---@file lua/users/default/plugins/init.lua
+---@description Default user plugin specs — extra or overriding lazy.nvim specs
+---@module "users.default.plugins"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see users.init              User loading orchestration
+---@see users.namespace         Namespace resolution and plugin discovery
+---@see users.default.settings  User settings overrides
+---@see users.default.keymaps   User keymaps
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  users/default/plugins/init.lua — Default user plugin specs              ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  How user plugins integrate with lazy.nvim:                      │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  ┌─────────────────────┐                                         │    ║
+--- ║  │  │  plugins/           │  ← core plugin specs (always loaded)    │    ║
+--- ║  │  │  ├─ ui/             │                                         │    ║
+--- ║  │  │  ├─ editor/         │                                         │    ║
+--- ║  │  │  ├─ code/           │                                         │    ║
+--- ║  │  │  └─ tools/          │                                         │    ║
+--- ║  │  └────────┬────────────┘                                         │    ║
+--- ║  │           │  lazy.nvim import merge                              │    ║
+--- ║  │           ▼                                                      │    ║
+--- ║  │  ┌────────────────────────────┐                                  │    ║
+--- ║  │  │  users/<name>/plugins/     │  ← THIS FILE (additive specs)    │    ║
+--- ║  │  │  └─ init.lua               │                                  │    ║
+--- ║  │  └────────────────────────────┘                                  │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Merge behavior:                                                 │    ║
+--- ║  │  ├─ New plugin (unique repo)  → added to plugin list             │    ║
+--- ║  │  ├─ Same repo as core plugin  → opts are deep-merged             │    ║
+--- ║  │  │  (user opts override core opts for matching keys)             │    ║
+--- ║  │  ├─ enabled = false           → disables a core plugin           │    ║
+--- ║  │  └─ config function           → replaces core config entirely    │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  The default user uses all core plugins unchanged.               │    ║
+--- ║  │  This file returns an empty list — no extra specs.               │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Examples for other users:                                       │    ║
+--- ║  │  ├─ Add a new plugin:                                            │    ║
+--- ║  │  │    { "tpope/vim-fugitive", cmd = { "Git" } }                  │    ║
+--- ║  │  ├─ Override a core plugin's opts:                               │    ║
+--- ║  │  │    { "nvim-telescope/telescope.nvim",                         │    ║
+--- ║  │  │      opts = { defaults = { layout_strategy = "center" } } }   │    ║
+--- ║  │  ├─ Disable a core plugin:                                       │    ║
+--- ║  │  │    { "some/plugin", enabled = false }                         │    ║
+--- ║  │  └─ Add user-only dev plugins:                                   │    ║
+--- ║  │       { "folke/neodev.nvim", ft = "lua" }                        │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  Optimizations:                                                          ║
+--- ║  • Empty list = zero overhead (no plugin specs to process)               ║
+--- ║  • lazy.nvim only processes non-empty spec lists                         ║
+--- ║  • File is discovered via lazy.nvim import — no manual require needed    ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- USER PLUGIN SPECS
+--
+-- Return a list of lazy.nvim plugin specs.
+-- These are merged with the core plugin specs from plugins/.
+--
+-- The default user inherits all core plugins unchanged.
+-- Add extra or overriding specs below.
+--
+-- Examples:
+--
+--   -- Add a new plugin
+--   {
+--     "tpope/vim-fugitive",
+--     cmd = { "Git", "Gstatus", "Gblame" },
+--   },
+--
+--   -- Override config of a core plugin
+--   {
+--     "nvim-telescope/telescope.nvim",
+--     opts = {
+--       defaults = {
+--         layout_strategy = "center",
+--       },
+--     },
+--   },
+--
+--   -- Disable a core plugin for this user
+--   {
+--     "some/plugin-you-dont-want",
+--     enabled = false,
+--   },
+-- ═══════════════════════════════════════════════════════════════════════
+
+---@type LazyPluginSpec[]
+return {
+	-- The default user inherits all core plugins unchanged.
+}

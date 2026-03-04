@@ -1,0 +1,42 @@
+---@file lua/plugins/tools/init.lua
+---@description Tools — developer tools entry point and module index
+---@module "plugins.tools"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see plugins.tools.toggleterm Multi-terminal management (float, horizontal, vertical)
+---@see plugins.tools.lazygit LazyGit integration via snacks.nvim
+---@see plugins Plugin layer documentation and category index
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  plugins/tools/init.lua — Developer tools entry point                    ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  This file is a no-op — it exists for documentation and as the   │    ║
+--- ║  │  lazy.nvim import entry point for the tools/ directory.          │    ║
+--- ║  │  Individual plugin specs live in their own files:                │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  plugins/tools/                                                  │    ║
+--- ║  │  ├─ toggleterm.lua    Multi-terminal management                  │    ║
+--- ║  │  │  ├─ Float, horizontal, vertical layouts                       │    ║
+--- ║  │  │  ├─ Numbered terminals (1-4)                                  │    ║
+--- ║  │  │  ├─ Send line/selection to terminal                           │    ║
+--- ║  │  │  ├─ Platform-aware shell detection                            │    ║
+--- ║  │  │  └─ Terminal-mode window navigation                           │    ║
+--- ║  │  │                                                               │    ║
+--- ║  │  └─ lazygit.lua       Full Git UI via snacks.nvim                │    ║
+--- ║  │     ├─ Floating lazygit terminal                                 │    ║
+--- ║  │     ├─ Git log (cwd and current file)                            │    ║
+--- ║  │     └─ Requires lazygit executable on PATH                       │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  Design decisions:                                                       ║
+--- ║  ├─ Returns {} — lazy.nvim scans sibling files for actual specs          ║
+--- ║  ├─ Both tools are independently guarded by settings                     ║
+--- ║  └─ lazygit also guarded by executable availability check                ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+return {}

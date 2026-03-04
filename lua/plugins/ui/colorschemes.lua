@@ -1,0 +1,56 @@
+---@file lua/plugins/ui/colorschemes.lua
+---@description Colorschemes — Intentionally empty placeholder (specs are dynamic)
+---@module "plugins.ui.colorschemes"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see config.colorscheme_manager  Dynamic colorscheme spec generation and application
+---@see config.plugin_manager       Injects generated specs into lazy.nvim at runtime
+---@see core.settings               `settings.colorschemes` table defines available themes
+---@see users.namespace             Per-user colorscheme override via user settings.lua
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  plugins/ui/colorschemes.lua — Empty placeholder                         ║
+--- ║                                                                          ║
+--- ║  This file is intentionally empty.                                       ║
+--- ║                                                                          ║
+--- ║  Why this file exists:                                                   ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  lazy.nvim scans lua/plugins/**/*.lua for plugin specs.          │    ║
+--- ║  │  Without this file, a developer might create one here and        │    ║
+--- ║  │  conflict with the dynamic spec generation system.               │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  This placeholder prevents accidental duplication by:            │    ║
+--- ║  │  1. Documenting that colorscheme specs live elsewhere            │    ║
+--- ║  │  2. Returning {} so lazy.nvim finds no specs here                │    ║
+--- ║  │  3. Serving as a breadcrumb for new contributors                 │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  How colorschemes actually work:                                         ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │                                                                  │    ║
+--- ║  │  settings.lua                                                    │    ║
+--- ║  │  └─ colorschemes = { "catppuccin", "tokyonight", … }             │    ║
+--- ║  │     │                                                            │    ║
+--- ║  │     ▼                                                            │    ║
+--- ║  │  config/colorscheme_manager.lua                                  │    ║
+--- ║  │  ├─ Generates lazy.nvim specs from the list                      │    ║
+--- ║  │  ├─ Sets priority = 1000 on the active theme                     │    ║
+--- ║  │  ├─ Applies colorscheme after plugins load                       │    ║
+--- ║  │  └─ Registers :Colorscheme* commands                             │    ║
+--- ║  │     │                                                            │    ║
+--- ║  │     ▼                                                            │    ║
+--- ║  │  config/plugin_manager.lua                                       │    ║
+--- ║  │  └─ Merges generated specs into lazy.nvim spec list              │    ║
+--- ║  │                                                                  │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  To add/remove colorschemes:                                             ║
+--- ║  • Global:   Edit `colorschemes` table in settings.lua                   ║
+--- ║  • Per-user:  Edit `colorschemes` in users/<name>/settings.lua           ║
+--- ║  • Do NOT add lazy specs in this file — they will be ignored             ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+return {}

@@ -1,0 +1,87 @@
+---@file lua/users/default/keymaps.lua
+---@description Default user keymaps — applied after core keymaps
+---@module "users.default.keymaps"
+---@author ca971
+---@license MIT
+---@version 1.0.0
+---@since 2026-01
+---
+---@see core.keymaps        Base keymap definitions and M.map() conflict detection API
+---@see users.namespace     Namespace loader that calls M.setup()
+---@see users.init          User loading orchestration
+---
+--- ╔══════════════════════════════════════════════════════════════════════════╗
+--- ║  users/default/keymaps.lua — Default user keymaps                        ║
+--- ║                                                                          ║
+--- ║  Architecture:                                                           ║
+--- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
+--- ║  │  Loading order:                                                  │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  ┌────────────────────┐     ┌──────────────────────────────┐     │    ║
+--- ║  │  │  core/keymaps.lua  │ ──► │  users/default/keymaps.lua   │     │    ║
+--- ║  │  │  (base defaults)   │     │  (this file — runs second)   │     │    ║
+--- ║  │  │  M.map() registry  │     │  M.setup() called by ns      │     │    ║
+--- ║  │  └────────────────────┘     └──────────────────────────────┘     │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  The default user inherits ALL core keymaps as-is.               │    ║
+--- ║  │  M.setup() is a no-op — no additional keymaps defined.           │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Override rules:                                                 │    ║
+--- ║  │  ├─ Use require("core.keymaps").map() for conflict detection     │    ║
+--- ║  │  │  NOT raw vim.keymap.set() — otherwise the registry is         │    ║
+--- ║  │  │  bypassed and conflicts go undetected                         │    ║
+--- ║  │  ├─ Any keymap set here shadows the core default                 │    ║
+--- ║  │  ├─ Buffer-local keymaps should use { buffer = true }            │    ║
+--- ║  │  └─ Check :lua require("core.keymaps").audit() for conflicts     │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Examples (uncomment to activate):                               │    ║
+--- ║  │  ├─ Custom greeting:  <leader>xx → notify("Hello!")              │    ║
+--- ║  │  ├─ Quick save:       <C-s> → :write                             │    ║
+--- ║  │  ├─ Toggle wrap:      <leader>tw → :set wrap!                    │    ║
+--- ║  │  └─ Open terminal:    <leader>tt → :terminal                     │    ║
+--- ║  └──────────────────────────────────────────────────────────────────┘    ║
+--- ║                                                                          ║
+--- ║  Optimizations:                                                          ║
+--- ║  • Empty setup = zero overhead (no map() calls)                          ║
+--- ║  • File is only loaded once at startup via users/init.lua                ║
+--- ║  • M.setup() pattern allows conditional keymaps based on runtime state   ║
+--- ╚══════════════════════════════════════════════════════════════════════════╝
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- MODULE
+-- ═══════════════════════════════════════════════════════════════════════
+
+local M = {}
+
+--- Set up user-specific key mappings.
+---
+--- Called by `users/namespace.lua` after core keymaps have been loaded.
+--- The default user uses all keymaps from `core/keymaps.lua` unchanged.
+---
+--- **Important:** Always use `require("core.keymaps").map()` instead of
+--- `vim.keymap.set()` to ensure conflict detection and registry tracking.
+---
+--- Add additional or overriding keymaps here:
+---
+--- ```lua
+--- function M.setup()
+---   local keys = require("core.keymaps")
+---
+---   -- This will warn if <leader>xx is already taken by another module
+---   keys.map("n", "<leader>xx", function()
+---     vim.notify("Hello from default user!")
+---   end, { desc = "Custom greeting" }, "user.default")
+--- end
+--- ```
+function M.setup()
+	-- The default user inherits all core keymaps unchanged.
+	-- Uncomment below to add user-specific keymaps:
+	--
+	-- local keys = require("core.keymaps")
+	--
+	-- keys.map("n", "<leader>xx", function()
+	--   vim.notify("Hello from default user!")
+	-- end, { desc = "Custom greeting" }, "user.default")
+end
+
+return M
