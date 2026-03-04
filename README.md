@@ -28,7 +28,7 @@ designed for professional developers and team environments.
   <img src="assets/commands.png" alt="Nvim Enterprise — Dashboard" width="850" style="border-radius: 12px; border: 2px solid #30363d;">
 </picture>
 
-<br/>
+<br/><br/>
 
 [Features](#-key-features) •
 [Install](#-installation) •
