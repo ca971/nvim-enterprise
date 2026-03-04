@@ -1,6 +1,6 @@
 <div align="center">
 
-# <img src="https://neovim.io/logos/neovim-mark.svg" width="42" height="42" alt="Neovim" /> NvimEnterprise
+# <img src="https://neovim.io/logos/neovim-mark.svg" width="42" height="42" alt="Neovim" /> Nvim Enterprise
 
 **Enterprise-Grade · Multi-User · Cross-Platform · Ultra-Modular · High-Performance**
 
@@ -84,13 +84,13 @@ configurations across engineers, or a sysadmin managing shared server environmen
 │                     NvimEnterprise Stack                         │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────────────┐  │
-│  │  Users   │  │  Langs   │  │ Plugins  │  │       AI        │  │
-│  │Namespace │  │ Modules  │  │ Registry │  │   Providers     │  │
-│  │ default  │  │  45+     │  │  35+     │  │ Copilot·Claude  │  │
-│  │ jane     │  │ per-file │  │ per-file │  │ Avante·Continue │  │
-│  │ john     │  │          │  │          │  │ CodeCompanion   │  │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └──────┬──────────┘  │
+│  ┌──────────┐   ┌──────────┐  ┌──────────┐  ┌─────────────────┐  │
+│  │  Users   │   │  Langs   │  │ Plugins  │  │       AI        │  │
+│  │Namespace │   │ Modules  │  │ Registry │  │   Providers     │  │
+│  │ default  │   │  45+     │  │  35+     │  │ Copilot·Claude  │  │
+│  │ jane     │   │ per-file │  │ per-file │  │ Avante·Continue │  │
+│  │ john     │   │          │  │          │  │ CodeCompanion   │  │
+│  └────┬─────┘   └────┬─────┘  └────┬─────┘  └──────┬──────────┘  │
 │       │              │             │               │             │
 │  ┌────▼──────────────▼─────────────▼───────────────▼──────────┐  │
 │  │        Config Layer (Settings · Plugin · Colorscheme)      │  │
