@@ -323,31 +323,6 @@ local function datetime_accent()
 	return hl_fg("Function") or hl_fg("@keyword") or hl_fg("Statement") or hl_fg("DiagnosticInfo") or "#94e2d5"
 end
 
---- Apply named highlight groups for the datetime badge.
----
---- Uses vim.api.nvim_set_hl to create persistent groups that
---- lualine respects (including bg). Called on init and ColorScheme.
----
---- Groups created:
----   LualineDatetime    — dark text on accent bg (badge)
----   LualineDatetimeSep — accent fg (round shape), no bg (inherited)
----@return nil
----@private
-local function apply_datetime_highlights()
-	local accent = datetime_accent()
-	local dark = hl_bg("Normal") or "#1e1e2e"
-
-	vim.api.nvim_set_hl(0, "LualineDatetime", {
-		fg = dark,
-		bg = accent,
-		bold = true,
-	})
-	vim.api.nvim_set_hl(0, "LualineDatetimeSep", {
-		fg = accent,
-		bg = "NONE",
-	})
-end
-
 --- Override lualine_z highlight groups for ALL modes with accent colors.
 ---
 --- This forces the entire section Z to use the accent bg (derived from
@@ -582,27 +557,6 @@ local function lsp_component()
 	local display = table.concat(names, ", ")
 	if #display > 25 then display = names[1] .. " +" .. (#names - 1) end
 	return " " .. display
-end
-
---- Show treesitter parser status for the current buffer.
----
---- Resolves the correct parser language from filetype,
---- then checks if the parser loads successfully.
----@return string component "󰗀" if parser is active, empty string otherwise
----@private
-local function treesitter_component()
-	local buf = vim.api.nvim_get_current_buf()
-	local ft = vim.bo[buf].filetype
-	if not ft or ft == "" then return "" end
-
-	local lang = ft
-	if vim.treesitter.language and vim.treesitter.language.get_lang then
-		local ok, resolved = pcall(vim.treesitter.language.get_lang, ft)
-		if ok and resolved then lang = resolved end
-	end
-
-	local parser_ok = pcall(vim.treesitter.get_parser, buf, lang)
-	return parser_ok and "󰗀" or ""
 end
 
 --- Check if GitHub Copilot LSP client is attached to the current buffer.
@@ -1013,7 +967,6 @@ local C = {
 	dap = { fg = "#f38ba8", gui = "bold" },
 	indent = { fg = "#9399b2" },
 	words = { fg = "#cba6f7" },
-	-- datetime = { fg = "#1e1e2e", bg = "#94e2d5" },
 	session = { fg = "#f2cdcd" },
 	filesize = { fg = "#9399b2" },
 	bufnr = { fg = "#6c7086" },
@@ -1147,7 +1100,7 @@ return {
 							if not s or s == "" then return "" end
 							return #s > 20 and s:sub(1, 17) .. "…" or s
 						end,
-						separator = { right = sep.thin_l },
+						separator = { right = sep.round_r },
 					},
 					{
 						"diff",
