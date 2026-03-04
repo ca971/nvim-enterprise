@@ -50,7 +50,7 @@ fi
 
 # --- 3. Deployment ---
 echo -e "${YELLOW}${INFO} Cloning NvimEnterprise...${NC}"
-git clone https://github.com/yourusername/nvim-enterprise.git "$NVIM_CONFIG"
+git clone https://github.com/ca971/nvim-enterprise.git "$NVIM_CONFIG"
 
 # --- 4. Finalizing ---
 echo -e "\n${GREEN}╔════════════════════════════════════════════════════════════════╗"
