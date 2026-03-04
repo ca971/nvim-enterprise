@@ -39,26 +39,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Lua
-        run: sudo apt-get install -y lua5.4
+      - name: Install luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          sudo luarocks install luacheck
 
       - name: Validate Lua syntax
         run: |
-          errors=0
-          count=0
-          while IFS= read -r file; do
-            count=$((count + 1))
-            if ! lua5.4 -p "$file" 2>/tmp/err.log; then
-              echo "❌ $file"
-              cat /tmp/err.log
-              errors=$((errors + 1))
-            fi
-          done < <(find lua -name "*.lua")
-          if [ "$errors" -gt 0 ]; then
-            echo "❌ $errors/$count file(s) with syntax errors"
-            exit 1
-          fi
-          echo "✅ $count Lua files — all valid"
+          luacheck lua/ \
+            --no-color \
+            --codes \
+            --no-max-line-length \
+            --globals vim \
+            --only 0 \
+            --no-unused
+          echo "✅ All Lua files have valid syntax"
 
   startup:
     name: Neovim Startup
