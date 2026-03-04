@@ -160,8 +160,7 @@ end
 ---@private
 local function is_nuxt()
 	local cwd = vim.fn.getcwd()
-	return vim.fn.filereadable(cwd .. "/nuxt.config.ts") == 1
-		or vim.fn.filereadable(cwd .. "/nuxt.config.js") == 1
+	return vim.fn.filereadable(cwd .. "/nuxt.config.ts") == 1 or vim.fn.filereadable(cwd .. "/nuxt.config.js") == 1
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -339,7 +338,9 @@ keys.lang_map("vue", "n", "<leader>lc", function()
 
 	-- ── Present selection ────────────────────────────────────────
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = vue_icon .. " Vue:" },
 		function(_, idx)
 			if not idx then return end
@@ -418,7 +419,9 @@ keys.lang_map("vue", "n", "<leader>lh", function()
 		{ name = "VueUse", url = "https://vueuse.org/" },
 	}
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = vue_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

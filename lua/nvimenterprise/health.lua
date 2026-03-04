@@ -7,7 +7,7 @@
 local M = {}
 
 function M.check()
-  require("core.health").check()
+	require("core.health").check()
 end
 
 return M

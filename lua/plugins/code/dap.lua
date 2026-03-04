@@ -60,9 +60,7 @@
 --- ╚══════════════════════════════════════════════════════════════════════════╝
 
 local settings = require("core.settings")
-if not settings:is_plugin_enabled("dap") then
-	return {}
-end
+if not settings:is_plugin_enabled("dap") then return {} end
 
 local icons = require("core.icons")
 
@@ -434,13 +432,7 @@ return {
 			all_references = false,
 			display_callback = function(variable, buf, stackframe, node, options)
 				if #variable.value > 80 then
-					return " "
-						.. icons.ui.Ellipsis
-						.. " "
-						.. variable.name
-						.. " = "
-						.. variable.value:sub(1, 77)
-						.. "…"
+					return " " .. icons.ui.Ellipsis .. " " .. variable.name .. " = " .. variable.value:sub(1, 77) .. "…"
 				end
 				return " " .. icons.arrows.SmallArrowRight .. " " .. variable.name .. " = " .. variable.value
 			end,

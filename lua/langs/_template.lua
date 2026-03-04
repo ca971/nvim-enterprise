@@ -31,9 +31,7 @@
 
 -- ── Guard clause ─────────────────────────────────────────────────────────
 local settings = require("core.settings")
-if not settings:is_language_enabled("LANG_KEY") then
-	return {}
-end
+if not settings:is_language_enabled("LANG_KEY") then return {} end
 
 local keys = require("core.keymaps")
 local icons = require("core.icons")
@@ -59,9 +57,7 @@ end
 
 --- Run the current file.
 keys.lang_map("LANG_KEY", "n", "<leader>lr", function()
-	if not check_runtime() then
-		return
-	end
+	if not check_runtime() then return end
 	vim.cmd("silent! write")
 	local file = vim.fn.expand("%:p")
 	vim.cmd.split()
@@ -70,15 +66,11 @@ end, { desc = icons.ui.Play .. " Run file" })
 
 --- Run with custom arguments.
 keys.lang_map("LANG_KEY", "n", "<leader>lR", function()
-	if not check_runtime() then
-		return
-	end
+	if not check_runtime() then return end
 	vim.cmd("silent! write")
 	local file = vim.fn.expand("%:p")
 	vim.ui.input({ prompt = "Arguments: " }, function(args)
-		if args == nil then
-			return
-		end
+		if args == nil then return end
 		vim.cmd.split()
 		vim.cmd.terminal("RUNTIME_CMD " .. vim.fn.shellescape(file) .. " " .. args)
 	end)
@@ -90,9 +82,7 @@ end, { desc = icons.ui.Play .. " Run with arguments" })
 
 --- Build project.
 keys.lang_map("LANG_KEY", "n", "<leader>lb", function()
-	if not check_runtime() then
-		return
-	end
+	if not check_runtime() then return end
 	vim.cmd("silent! write")
 	vim.cmd.split()
 	vim.cmd.terminal("BUILD_CMD")
@@ -100,9 +90,7 @@ end, { desc = icons.dev.Build .. " Build" })
 
 --- Run tests.
 keys.lang_map("LANG_KEY", "n", "<leader>lt", function()
-	if not check_runtime() then
-		return
-	end
+	if not check_runtime() then return end
 	vim.cmd("silent! write")
 	vim.cmd.split()
 	vim.cmd.terminal("TEST_CMD")
@@ -114,9 +102,7 @@ end, { desc = icons.dev.Test .. " Test" })
 
 --- Open REPL / interactive console.
 keys.lang_map("LANG_KEY", "n", "<leader>lc", function()
-	if not check_runtime() then
-		return
-	end
+	if not check_runtime() then return end
 	vim.cmd.split()
 	vim.cmd.terminal("REPL_CMD")
 end, { desc = icons.ui.Terminal .. " REPL" })
@@ -154,15 +140,11 @@ keys.lang_map("LANG_KEY", "n", "<leader>lp", function()
 		end, actions),
 		{ prompt = lang_icon .. " Packages:" },
 		function(_, idx)
-			if not idx then
-				return
-			end
+			if not idx then return end
 			local action = actions[idx]
 			if action.prompt then
 				vim.ui.input({ prompt = "Package: " }, function(name)
-					if not name or name == "" then
-						return
-					end
+					if not name or name == "" then return end
 					vim.cmd.split()
 					vim.cmd.terminal(action.cmd .. " " .. vim.fn.shellescape(name))
 				end)
@@ -212,9 +194,7 @@ keys.lang_map("LANG_KEY", "n", "<leader>lh", function()
 		end, refs),
 		{ prompt = lang_icon .. " Documentation:" },
 		function(_, idx)
-			if idx then
-				vim.ui.open(refs[idx].url)
-			end
+			if idx then vim.ui.open(refs[idx].url) end
 		end
 	)
 end, { desc = icons.ui.Note .. " Documentation" })

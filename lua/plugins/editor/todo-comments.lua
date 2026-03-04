@@ -35,7 +35,7 @@
 --- ║  Global keymaps:                                                         ║
 --- ║    ]t              Next TODO comment                          (n)        ║
 --- ║    [t              Previous TODO comment                      (n)        ║
---- ║    <leader>xt      TODO list (Trouble)                        (n)        ║ 
+--- ║    <leader>xt      TODO list (Trouble)                        (n)        ║
 --- ║    <leader>xT      TODO/FIX/FIXME only (Trouble)              (n)        ║
 --- ║    <leader>st      Search TODOs (Telescope)                   (n)        ║
 --- ╚══════════════════════════════════════════════════════════════════════════╝
@@ -90,7 +90,7 @@ return {
 	-- ═══════════════════════════════════════════════════════════════════
 	opts = {
 		-- ── Signs ────────────────────────────────────────────────────
-		signs         = true,
+		signs = true,
 		sign_priority = 8,
 
 		-- ── Keywords ─────────────────────────────────────────────────
@@ -109,26 +109,26 @@ return {
 		-- Each entry is a priority list: highlight group → fallback hex.
 		-- The plugin uses the first available match.
 		colors = {
-			error   = { "DiagnosticError", "ErrorMsg",   "#f38ba8" },
-			warning = { "DiagnosticWarn",  "WarningMsg", "#f9e2af" },
-			info    = { "DiagnosticInfo",  "#89b4fa" },
-			hint    = { "DiagnosticHint",  "#94e2d5" },
-			default = { "Identifier",     "#cba6f7" },
-			test    = { "Identifier",     "#a6e3a1" },
+			error = { "DiagnosticError", "ErrorMsg", "#f38ba8" },
+			warning = { "DiagnosticWarn", "WarningMsg", "#f9e2af" },
+			info = { "DiagnosticInfo", "#89b4fa" },
+			hint = { "DiagnosticHint", "#94e2d5" },
+			default = { "Identifier", "#cba6f7" },
+			test = { "Identifier", "#a6e3a1" },
 		},
 
 		-- ── Highlight ────────────────────────────────────────────────
 		highlight = {
-			multiline         = true,
+			multiline = true,
 			multiline_pattern = "^.",
 			multiline_context = 10,
-			before            = "",     ---@type "fg"|"bg"|""
-			keyword           = "wide", ---@type "fg"|"bg"|"wide"|""
-			after             = "fg",   ---@type "fg"|"bg"|""
-			pattern           = [[.*<(KEYWORDS)\s*:]],
-			comments_only     = true,
-			max_line_len      = 400,
-			exclude           = {},
+			before = "", ---@type "fg"|"bg"|""
+			keyword = "wide", ---@type "fg"|"bg"|"wide"|""
+			after = "fg", ---@type "fg"|"bg"|""
+			pattern = [[.*<(KEYWORDS)\s*:]],
+			comments_only = true,
+			max_line_len = 400,
+			exclude = {},
 		},
 
 		-- ── Search ───────────────────────────────────────────────────

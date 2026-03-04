@@ -112,12 +112,8 @@ keys.lang_group("prisma", "Prisma", prisma_icon)
 ---@private
 local function get_prisma_cmd()
 	local cwd = vim.fn.getcwd()
-	if vim.fn.filereadable(cwd .. "/node_modules/.bin/prisma") == 1 then
-		return "npx prisma"
-	end
-	if vim.fn.executable("prisma") == 1 then
-		return "prisma"
-	end
+	if vim.fn.filereadable(cwd .. "/node_modules/.bin/prisma") == 1 then return "npx prisma" end
+	if vim.fn.executable("prisma") == 1 then return "prisma" end
 	return nil
 end
 
@@ -132,11 +128,7 @@ end
 local function check_prisma()
 	local cmd = get_prisma_cmd()
 	if not cmd then
-		vim.notify(
-			"prisma not found\nInstall: npm install prisma",
-			vim.log.levels.WARN,
-			{ title = "Prisma" }
-		)
+		vim.notify("prisma not found\nInstall: npm install prisma", vim.log.levels.WARN, { title = "Prisma" })
 	end
 	return cmd
 end
@@ -213,11 +205,7 @@ keys.lang_map("prisma", "n", "<leader>ls", function()
 	local cmd = check_prisma()
 	if not cmd then return end
 	vim.fn.jobstart(cmd .. " studio", { detach = true })
-	vim.notify(
-		"Prisma Studio at http://localhost:5555",
-		vim.log.levels.INFO,
-		{ title = "Prisma" }
-	)
+	vim.notify("Prisma Studio at http://localhost:5555", vim.log.levels.INFO, { title = "Prisma" })
 end, { desc = prisma_icon .. " Prisma Studio" })
 
 --- Push the schema state to the database without migrations.
@@ -323,22 +311,24 @@ keys.lang_map("prisma", "n", "<leader>lc", function()
 
 	---@type { name: string, cmd: string, prompt?: boolean }[]
 	local actions = {
-		{ name = "generate",       cmd = cmd .. " generate" },
-		{ name = "format",         cmd = cmd .. " format" },
-		{ name = "validate",       cmd = cmd .. " validate" },
-		{ name = "migrate dev…",   cmd = cmd .. " migrate dev --name", prompt = true },
+		{ name = "generate", cmd = cmd .. " generate" },
+		{ name = "format", cmd = cmd .. " format" },
+		{ name = "validate", cmd = cmd .. " validate" },
+		{ name = "migrate dev…", cmd = cmd .. " migrate dev --name", prompt = true },
 		{ name = "migrate deploy", cmd = cmd .. " migrate deploy" },
-		{ name = "migrate reset",  cmd = cmd .. " migrate reset" },
+		{ name = "migrate reset", cmd = cmd .. " migrate reset" },
 		{ name = "migrate status", cmd = cmd .. " migrate status" },
-		{ name = "db push",        cmd = cmd .. " db push" },
-		{ name = "db pull",        cmd = cmd .. " db pull" },
-		{ name = "db seed",        cmd = cmd .. " db seed" },
-		{ name = "studio",         cmd = cmd .. " studio" },
-		{ name = "version",        cmd = cmd .. " version" },
+		{ name = "db push", cmd = cmd .. " db push" },
+		{ name = "db pull", cmd = cmd .. " db pull" },
+		{ name = "db seed", cmd = cmd .. " db seed" },
+		{ name = "studio", cmd = cmd .. " studio" },
+		{ name = "version", cmd = cmd .. " version" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = prisma_icon .. " Prisma:" },
 		function(_, idx)
 			if not idx then return end
@@ -400,9 +390,7 @@ keys.lang_map("prisma", "n", "<leader>li", function()
 			in_model = false
 		elseif in_model and line:match("^%s+%w+") then
 			fields = fields + 1
-			if line:match("@relation") then
-				relations = relations + 1
-			end
+			if line:match("@relation") then relations = relations + 1 end
 		end
 	end
 
@@ -440,14 +428,16 @@ end, { desc = icons.diagnostics.Info .. " Schema stats" })
 keys.lang_map("prisma", "n", "<leader>lh", function()
 	---@type { name: string, url: string }[]
 	local refs = {
-		{ name = "Prisma Docs",       url = "https://www.prisma.io/docs" },
-		{ name = "Schema Reference",  url = "https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference" },
+		{ name = "Prisma Docs", url = "https://www.prisma.io/docs" },
+		{ name = "Schema Reference", url = "https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference" },
 		{ name = "Prisma Client API", url = "https://www.prisma.io/docs/reference/api-reference/prisma-client-reference" },
-		{ name = "Prisma Migrate",    url = "https://www.prisma.io/docs/concepts/components/prisma-migrate" },
+		{ name = "Prisma Migrate", url = "https://www.prisma.io/docs/concepts/components/prisma-migrate" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = prisma_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

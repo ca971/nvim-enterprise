@@ -187,9 +187,7 @@ keys.lang_map("go", "n", "<leader>lT", function()
 			local name_node = node:field("name")[1]
 			if name_node then
 				local name = vim.treesitter.get_node_text(name_node, 0)
-				if name:match("^Test") or name:match("^Benchmark") or name:match("^Example") then
-					func_name = name
-				end
+				if name:match("^Test") or name:match("^Benchmark") or name:match("^Example") then func_name = name end
 			end
 			break
 		end
@@ -223,11 +221,7 @@ keys.lang_map("go", "n", "<leader>lc", function()
 	vim.cmd("silent! write")
 	local cover_file = vim.fn.tempname() .. ".cover"
 	vim.cmd.split()
-	vim.cmd.terminal(string.format(
-		"go test -coverprofile=%s ./... && go tool cover -func=%s",
-		cover_file,
-		cover_file
-	))
+	vim.cmd.terminal(string.format("go test -coverprofile=%s ./... && go tool cover -func=%s", cover_file, cover_file))
 end, { desc = icons.dev.Test .. " Coverage profile" })
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -347,9 +341,7 @@ keys.lang_map("go", "n", "<leader>lo", function()
 	local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
 	for _, res in pairs(result or {}) do
 		for _, r in pairs(res.result or {}) do
-			if r.edit then
-				vim.lsp.util.apply_workspace_edit(r.edit, "utf-16")
-			end
+			if r.edit then vim.lsp.util.apply_workspace_edit(r.edit, "utf-16") end
 		end
 	end
 	vim.notify("Imports organized", vim.log.levels.INFO, { title = "Go" })
@@ -404,11 +396,7 @@ keys.lang_map("go", "n", "<leader>lA", function()
 	end
 	local file = vim.fn.expand("%:p")
 	local line = vim.api.nvim_win_get_cursor(0)[1]
-	vim.fn.system(string.format(
-		"gomodifytags -file %s -line %d -clear-tags -w",
-		vim.fn.shellescape(file),
-		line
-	))
+	vim.fn.system(string.format("gomodifytags -file %s -line %d -clear-tags -w", vim.fn.shellescape(file), line))
 	vim.cmd.edit()
 	vim.notify("Tags removed", vim.log.levels.INFO, { title = "Go" })
 end, { desc = go_icon .. " Remove struct tags" })
@@ -426,9 +414,7 @@ keys.lang_map("go", "n", "<leader>lf", function()
 	for _, res in pairs(result or {}) do
 		for _, r in pairs(res.result or {}) do
 			if r.title and r.title:match("[Ff]ill") then
-				if r.edit then
-					vim.lsp.util.apply_workspace_edit(r.edit, "utf-16")
-				end
+				if r.edit then vim.lsp.util.apply_workspace_edit(r.edit, "utf-16") end
 				vim.notify("Struct filled", vim.log.levels.INFO, { title = "Go" })
 				return
 			end
@@ -524,9 +510,15 @@ do
 		keys.lang_map({ "go", "gomod", "gowork" }, { "n", "x" }, "<leader>aL", align_registry.make_align_fn("go_struct"), {
 			desc = align_icon .. "  Align Go struct",
 		})
-		keys.lang_map({ "go", "gomod", "gowork" }, { "n", "x" }, "<leader>aT", align_registry.make_align_fn("go_struct_tags"), {
-			desc = align_icon .. "  Align Go tags",
-		})
+		keys.lang_map(
+			{ "go", "gomod", "gowork" },
+			{ "n", "x" },
+			"<leader>aT",
+			align_registry.make_align_fn("go_struct_tags"),
+			{
+				desc = align_icon .. "  Align Go tags",
+			}
+		)
 		keys.lang_map({ "go", "gomod", "gowork" }, { "n", "x" }, "<leader>aM", align_registry.make_align_fn("go_map"), {
 			desc = align_icon .. "  Align Go map",
 		})

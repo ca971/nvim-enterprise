@@ -7,19 +7,19 @@
 -- ╚══════════════════════════════════════════════════════════════════╝
 
 return {
-  -- Example: add a new plugin
-  -- {
-  --   "tpope/vim-fugitive",
-  --   cmd = { "Git", "Gstatus", "Gblame" },
-  -- },
+	-- Example: add a new plugin
+	-- {
+	--   "tpope/vim-fugitive",
+	--   cmd = { "Git", "Gstatus", "Gblame" },
+	-- },
 
-  -- Example: override a default plugin's options
-  -- {
-  --   "nvim-telescope/telescope.nvim",
-  --   opts = {
-  --     defaults = {
-  --       layout_strategy = "horizontal",
-  --     },
-  --   },
-  -- },
+	-- Example: override a default plugin's options
+	-- {
+	--   "nvim-telescope/telescope.nvim",
+	--   opts = {
+	--     defaults = {
+	--       layout_strategy = "horizontal",
+	--     },
+	--   },
+	-- },
 }

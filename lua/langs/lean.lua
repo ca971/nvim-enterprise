@@ -56,7 +56,7 @@
 --- ║  • tabstop=2, shiftwidth=2         (Lean standard indentation)           ║
 --- ║  • expandtab=true                  (spaces, never tabs)                  ║
 --- ║  • commentstring="-- %s"           (Lean single-line comment)            ║
---- ║  • Treesitter folding              (foldmethod=expr, foldlevel=99)       ║ 
+--- ║  • Treesitter folding              (foldmethod=expr, foldlevel=99)       ║
 --- ║                                                                          ║
 --- ║  Lake (build system) commands:                                           ║
 --- ║  • lake build   — compile the project                                    ║
@@ -156,9 +156,7 @@ local function run_lake(subcommand, save)
 		notify_no_lake()
 		return
 	end
-	if save then
-		vim.cmd("silent! write")
-	end
+	if save then vim.cmd("silent! write") end
 	vim.cmd.split()
 	vim.cmd.terminal("lake " .. subcommand)
 end
@@ -312,7 +310,9 @@ keys.lang_map("lean", "n", "<leader>lh", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = lean_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

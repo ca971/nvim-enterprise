@@ -229,10 +229,7 @@ keys.lang_map("svelte", "n", "<leader>lt", function()
 
 	---@type string
 	local cmd
-	if
-		vim.fn.filereadable(cwd .. "/vitest.config.ts") == 1
-		or vim.fn.filereadable(cwd .. "/vitest.config.js") == 1
-	then
+	if vim.fn.filereadable(cwd .. "/vitest.config.ts") == 1 or vim.fn.filereadable(cwd .. "/vitest.config.js") == 1 then
 		cmd = run_script("test")
 	elseif vim.fn.filereadable(cwd .. "/playwright.config.ts") == 1 then
 		cmd = run_script("test")
@@ -296,21 +293,23 @@ keys.lang_map("svelte", "n", "<leader>lc", function()
 
 	---@type { name: string, cmd: string }[]
 	local actions = {
-		{ name = "dev",              cmd = run_script("dev") },
-		{ name = "build",            cmd = run_script("build") },
-		{ name = "preview",          cmd = run_script("preview") },
-		{ name = "check",            cmd = run_script("check") },
-		{ name = "lint",             cmd = run_script("lint") },
-		{ name = "format",           cmd = run_script("format") },
-		{ name = "test:unit",        cmd = run_script("test:unit") },
+		{ name = "dev", cmd = run_script("dev") },
+		{ name = "build", cmd = run_script("build") },
+		{ name = "preview", cmd = run_script("preview") },
+		{ name = "check", cmd = run_script("check") },
+		{ name = "lint", cmd = run_script("lint") },
+		{ name = "format", cmd = run_script("format") },
+		{ name = "test:unit", cmd = run_script("test:unit") },
 		{ name = "test:integration", cmd = run_script("test:integration") },
-		{ name = runner .. " install",  cmd = runner .. " install" },
-		{ name = runner .. " update",   cmd = runner .. " update" },
+		{ name = runner .. " install", cmd = runner .. " install" },
+		{ name = runner .. " update", cmd = runner .. " update" },
 		{ name = runner .. " outdated", cmd = runner .. " outdated" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = svelte_icon .. " Svelte:" },
 		function(_, idx)
 			if not idx then return end
@@ -383,14 +382,16 @@ end, { desc = icons.diagnostics.Info .. " Package info" })
 keys.lang_map("svelte", "n", "<leader>lh", function()
 	---@type { name: string, url: string }[]
 	local refs = {
-		{ name = "Svelte Docs",     url = "https://svelte.dev/docs" },
-		{ name = "SvelteKit Docs",  url = "https://kit.svelte.dev/docs" },
+		{ name = "Svelte Docs", url = "https://svelte.dev/docs" },
+		{ name = "SvelteKit Docs", url = "https://kit.svelte.dev/docs" },
 		{ name = "Svelte Tutorial", url = "https://learn.svelte.dev/" },
-		{ name = "Svelte REPL",     url = "https://svelte.dev/repl" },
+		{ name = "Svelte REPL", url = "https://svelte.dev/repl" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = svelte_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

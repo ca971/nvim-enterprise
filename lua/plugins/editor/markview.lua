@@ -293,11 +293,7 @@ local function generate_toc()
 	toc[#toc + 1] = ""
 	local row = vim.api.nvim_win_get_cursor(0)[1]
 	vim.api.nvim_buf_set_lines(0, row - 1, row - 1, false, toc)
-	vim.notify(
-		string.format("TOC generated (%d headings)", heading_count),
-		vim.log.levels.INFO,
-		{ title = "Markview" }
-	)
+	vim.notify(string.format("TOC generated (%d headings)", heading_count), vim.log.levels.INFO, { title = "Markview" })
 end
 
 --- Jump to the next markdown heading below the cursor.

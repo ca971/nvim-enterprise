@@ -66,9 +66,7 @@
 -- ═══════════════════════════════════════════════════════════════════════
 
 local settings_ok, settings = pcall(require, "core.settings")
-if settings_ok and not settings:is_plugin_enabled("wakatime") then
-	return {}
-end
+if settings_ok and not settings:is_plugin_enabled("wakatime") then return {} end
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- PLUGIN SPEC

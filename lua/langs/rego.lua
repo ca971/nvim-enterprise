@@ -112,11 +112,7 @@ keys.lang_group("rego", "Rego", rego_icon)
 ---@private
 local function check_opa()
 	if vim.fn.executable("opa") ~= 1 then
-		vim.notify(
-			"opa not found in PATH — install Open Policy Agent",
-			vim.log.levels.ERROR,
-			{ title = "Rego" }
-		)
+		vim.notify("opa not found in PATH — install Open Policy Agent", vim.log.levels.ERROR, { title = "Rego" })
 		return false
 	end
 	return true
@@ -337,15 +333,17 @@ end, { desc = icons.diagnostics.Info .. " OPA info" })
 keys.lang_map("rego", "n", "<leader>lh", function()
 	---@type { name: string, url: string }[]
 	local refs = {
-		{ name = "OPA Docs",        url = "https://www.openpolicyagent.org/docs/latest/" },
-		{ name = "Rego Reference",  url = "https://www.openpolicyagent.org/docs/latest/policy-reference/" },
+		{ name = "OPA Docs", url = "https://www.openpolicyagent.org/docs/latest/" },
+		{ name = "Rego Reference", url = "https://www.openpolicyagent.org/docs/latest/policy-reference/" },
 		{ name = "Rego Playground", url = "https://play.openpolicyagent.org/" },
-		{ name = "Styra Academy",   url = "https://academy.styra.com/" },
-		{ name = "OPA GitHub",      url = "https://github.com/open-policy-agent/opa" },
+		{ name = "Styra Academy", url = "https://academy.styra.com/" },
+		{ name = "OPA GitHub", url = "https://github.com/open-policy-agent/opa" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = rego_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

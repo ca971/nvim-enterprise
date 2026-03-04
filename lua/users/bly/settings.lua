@@ -7,34 +7,34 @@
 
 ---@type NvimEnterpriseSettings
 return {
-  -- ┌──────────────────────────────────────────────────────────────┐
-  -- │ Example overrides (uncomment and modify as needed):         │
-  -- └──────────────────────────────────────────────────────────────┘
+	-- ┌──────────────────────────────────────────────────────────────┐
+	-- │ Example overrides (uncomment and modify as needed):         │
+	-- └──────────────────────────────────────────────────────────────┘
 
-  -- ui = {
-  --   colorscheme = "tokyonight",
-  --   colorscheme_style = "moon",
-  --   transparent_background = false,
-  -- },
+	-- ui = {
+	--   colorscheme = "tokyonight",
+	--   colorscheme_style = "moon",
+	--   transparent_background = false,
+	-- },
 
-  -- editor = {
-  --   tab_size = 4,
-  --   relative_number = true,
-  -- },
+	-- editor = {
+	--   tab_size = 4,
+	--   relative_number = true,
+	-- },
 
-  -- languages = {
-  --   enabled = { "lua", "python", "go", "rust", "typescript" },
-  -- },
+	-- languages = {
+	--   enabled = { "lua", "python", "go", "rust", "typescript" },
+	-- },
 
-  -- ai = {
-  --   enabled = true,
-  --   provider = "copilot",
-  --   copilot = { enabled = true },
-  -- },
+	-- ai = {
+	--   enabled = true,
+	--   provider = "copilot",
+	--   copilot = { enabled = true },
+	-- },
 
-  -- plugins = {
-  --   -- Disable specific plugins:
-  --   -- disabled = { "folke/flash.nvim" },
-  --   -- wakatime = { enabled = true },
-  -- },
+	-- plugins = {
+	--   -- Disable specific plugins:
+	--   -- disabled = { "folke/flash.nvim" },
+	--   -- wakatime = { enabled = true },
+	-- },
 }

@@ -216,14 +216,14 @@ keys.lang_map("helm", "n", "<leader>lR", function()
 
 	-- ── Picker with discovered values files ──────────────────────────
 	---@type string[]
-	local display = vim.tbl_map(function(f) return vim.fn.fnamemodify(f, ":t") end, values_files)
+	local display = vim.tbl_map(function(f)
+		return vim.fn.fnamemodify(f, ":t")
+	end, values_files)
 
 	vim.ui.select(display, { prompt = helm_icon .. " Select values file:" }, function(_, idx)
 		if not idx then return end
 		vim.cmd.split()
-		vim.cmd.terminal(
-			"helm template " .. vim.fn.shellescape(chart) .. " -f " .. vim.fn.shellescape(values_files[idx])
-		)
+		vim.cmd.terminal("helm template " .. vim.fn.shellescape(chart) .. " -f " .. vim.fn.shellescape(values_files[idx]))
 	end)
 end, { desc = icons.ui.Play .. " Render with values" })
 
@@ -344,7 +344,9 @@ keys.lang_map("helm", "n", "<leader>lV", function()
 	end
 
 	---@type string[]
-	local display = vim.tbl_map(function(f) return vim.fn.fnamemodify(f, ":t") end, values_files)
+	local display = vim.tbl_map(function(f)
+		return vim.fn.fnamemodify(f, ":t")
+	end, values_files)
 
 	vim.ui.select(display, { prompt = helm_icon .. " Select values file:" }, function(_, idx)
 		if not idx then return end
@@ -386,9 +388,7 @@ keys.lang_map("helm", "n", "<leader>li", function()
 	local info = {}
 	for _, line in ipairs(lines) do
 		local key, val = line:match("^(%w+):%s*(.+)$")
-		if key and val then
-			info[#info + 1] = string.format("  %-15s %s", key .. ":", val)
-		end
+		if key and val then info[#info + 1] = string.format("  %-15s %s", key .. ":", val) end
 	end
 
 	if #info > 0 then

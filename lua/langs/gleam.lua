@@ -243,7 +243,9 @@ keys.lang_map("gleam", "n", "<leader>lp", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = gleam_icon .. " Deps:" },
 		function(_, idx)
 			if not idx then return end
@@ -320,7 +322,9 @@ keys.lang_map("gleam", "n", "<leader>lh", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = gleam_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

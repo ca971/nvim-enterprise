@@ -178,9 +178,7 @@ local function run_jq(args, content)
 
 	local lines = vim.split(result, "\n")
 	-- Strip trailing empty line (jq always appends newline)
-	if lines[#lines] == "" then
-		lines[#lines] = nil
-	end
+	if lines[#lines] == "" then lines[#lines] = nil end
 	return lines
 end
 
@@ -279,9 +277,7 @@ keys.lang_map(json_fts, "n", "<leader>lx", function()
 	vim.ui.input({ prompt = "jq expression: ", default = "." }, function(expr)
 		if not expr or expr == "" then return end
 		local lines = run_jq(vim.fn.shellescape(expr), get_buf_content())
-		if lines then
-			open_scratch(lines, "json")
-		end
+		if lines then open_scratch(lines, "json") end
 	end)
 end, { desc = icons.ui.Search .. " JQ query" })
 
@@ -534,7 +530,9 @@ keys.lang_map(json_fts, "n", "<leader>lh", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = json_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end
@@ -672,9 +670,7 @@ return {
 					["%.json[c5]?$"] = function(path, bufnr)
 						local content = vim.api.nvim_buf_get_lines(bufnr, 0, 5, false)
 						for _, line in ipairs(content) do
-							if line:match("^%s*//") or line:match("^%s*/%*") then
-								return "jsonc"
-							end
+							if line:match("^%s*//") or line:match("^%s*/%*") then return "jsonc" end
 						end
 					end,
 				},

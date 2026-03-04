@@ -4,39 +4,46 @@
 
 ---@type NvimEnterpriseSettings
 return {
-  ui = {
-    colorscheme       = "kanagawa",
-    colorscheme_style = "wave",
-  },
+	ui = {
+		colorscheme = "kanagawa",
+		colorscheme_style = "wave",
+	},
 
-  editor = {
-    tab_size = 4,
-    wrap     = true,
-  },
+	editor = {
+		tab_size = 4,
+		wrap = true,
+	},
 
-  languages = {
-    enabled = {
-      "lua", "python", "r", "julia", "sql",
-      "json", "yaml", "markdown", "csv",
-    },
-  },
+	languages = {
+		enabled = {
+			"lua",
+			"python",
+			"r",
+			"julia",
+			"sql",
+			"json",
+			"yaml",
+			"markdown",
+			"csv",
+		},
+	},
 
-  ai = {
-    enabled  = true,
-    provider = "claude",
-    continue_completion = false,
-    avante = {
-      enabled  = true,
-      provider = "claude",
-    },
-  },
+	ai = {
+		enabled = true,
+		provider = "claude",
+		continue_completion = false,
+		avante = {
+			enabled = true,
+			provider = "claude",
+		},
+	},
 
-  plugins = {
-    flash     = { enabled = false }, -- Jane doesn't use flash
-    startuptime = { enabled = true },
-  },
+	plugins = {
+		flash = { enabled = false }, -- Jane doesn't use flash
+		startuptime = { enabled = true },
+	},
 
-  lazyvim_extras = {
-    enabled = false,
-  },
+	lazyvim_extras = {
+		enabled = false,
+	},
 }

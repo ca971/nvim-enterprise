@@ -47,9 +47,7 @@
 --- ╚══════════════════════════════════════════════════════════════════════════╝
 
 local settings = require("core.settings")
-if not settings:is_plugin_enabled("startuptime") then
-	return {}
-end
+if not settings:is_plugin_enabled("startuptime") then return {} end
 
 ---@type lazy.PluginSpec
 return {

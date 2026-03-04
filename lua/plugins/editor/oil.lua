@@ -88,7 +88,7 @@ local uv = vim.uv or vim.loop
 ---@type table<string, true>
 ---@private
 local ALWAYS_HIDDEN = {
-	[".."]   = true,
+	[".."] = true,
 	[".git"] = true,
 }
 
@@ -117,9 +117,7 @@ local function yank_path(fmt)
 	if not entry or not dir then return end
 
 	local path = dir .. entry.name
-	if fmt == "relative" then
-		path = vim.fn.fnamemodify(path, ":~:.")
-	end
+	if fmt == "relative" then path = vim.fn.fnamemodify(path, ":~:.") end
 
 	vim.fn.setreg("+", path)
 	notify(string.format("%s  Copied: %s", icons.ui.Check, path))
@@ -165,9 +163,9 @@ return {
 	-- with lazy.nvim's plugin resolution.
 	-- ═══════════════════════════════════════════════════════════════════
 	init = function()
-		vim.g.loaded_netrw             = 1
-		vim.g.loaded_netrwPlugin       = 1
-		vim.g.loaded_netrwSettings     = 1
+		vim.g.loaded_netrw = 1
+		vim.g.loaded_netrwPlugin = 1
+		vim.g.loaded_netrwSettings = 1
 		vim.g.loaded_netrwFileHandlers = 1
 
 		if vim.fn.argc(-1) == 1 then
@@ -176,40 +174,42 @@ return {
 			if stat and stat.type == "directory" then
 				vim.api.nvim_create_autocmd("VimEnter", {
 					once = true,
-					callback = function() require("oil") end,
+					callback = function()
+						require("oil")
+					end,
 				})
 			end
 		end
 	end,
 
 	opts = {
-		default_file_explorer          = true,
-		columns                        = { "icon" },
-		delete_to_trash                = true,
-		skip_confirm_for_simple_edits  = true,
+		default_file_explorer = true,
+		columns = { "icon" },
+		delete_to_trash = true,
+		skip_confirm_for_simple_edits = true,
 		prompt_save_on_select_new_entry = true,
-		watch_for_changes              = true,
-		constrain_cursor               = "name",
+		watch_for_changes = true,
+		constrain_cursor = "name",
 
 		-- ── LSP file rename awareness ────────────────────────────────
 		lsp_file_methods = {
-			enabled            = true,
-			timeout_ms         = 1000,
-			autosave_changes   = false,
+			enabled = true,
+			timeout_ms = 1000,
+			autosave_changes = false,
 		},
 
 		-- ── Oil buffer window options ────────────────────────────────
 		win_options = {
-			signcolumn     = "no",
-			number         = false,
+			signcolumn = "no",
+			number = false,
 			relativenumber = false,
-			wrap           = false,
-			cursorcolumn   = false,
-			foldcolumn     = "0",
-			spell          = false,
-			list           = false,
-			conceallevel   = 3,
-			concealcursor  = "nvic",
+			wrap = false,
+			cursorcolumn = false,
+			foldcolumn = "0",
+			spell = false,
+			list = false,
+			conceallevel = 3,
+			concealcursor = "nvic",
 		},
 
 		-- ── Buffer-local keymaps ─────────────────────────────────────
@@ -223,9 +223,9 @@ return {
 			["<C-l>"] = false, -- conflicts with global Right window (<C-l>)
 
 			-- Replacements for disabled defaults
-			["<C-v>"] = { "actions.select",  opts = { vertical = true },   desc = icons.ui.Window  .. " Open in vsplit" },
-			["<C-x>"] = { "actions.select",  opts = { horizontal = true }, desc = icons.ui.Window  .. " Open in hsplit" },
-			["<C-r>"] = { "actions.refresh",                                desc = icons.ui.Refresh .. " Refresh" },
+			["<C-v>"] = { "actions.select", opts = { vertical = true }, desc = icons.ui.Window .. " Open in vsplit" },
+			["<C-x>"] = { "actions.select", opts = { horizontal = true }, desc = icons.ui.Window .. " Open in hsplit" },
+			["<C-r>"] = { "actions.refresh", desc = icons.ui.Refresh .. " Refresh" },
 
 			-- Close
 			["q"] = { "actions.close", desc = icons.ui.Close .. " Close" },
@@ -236,38 +236,42 @@ return {
 			-- Yank path variants
 			["gy"] = {
 				desc = icons.ui.Copy .. " Yank absolute path",
-				callback = function() yank_path("absolute") end,
+				callback = function()
+					yank_path("absolute")
+				end,
 			},
 			["gY"] = {
 				desc = icons.ui.Copy .. " Yank relative path",
-				callback = function() yank_path("relative") end,
+				callback = function()
+					yank_path("relative")
+				end,
 			},
 		},
 
 		-- ── Floating window ──────────────────────────────────────────
 		float = {
-			padding     = 2,
-			max_width   = 120,
-			max_height  = 40,
-			border      = icons.borders.Rounded,
+			padding = 2,
+			max_width = 120,
+			max_height = 40,
+			border = icons.borders.Rounded,
 			win_options = { winblend = 0 },
 		},
 
 		-- ── Preview window ───────────────────────────────────────────
 		preview = {
-			max_width   = 0.9,
-			min_width   = { 40, 0.4 },
-			border      = icons.borders.Rounded,
+			max_width = 0.9,
+			min_width = { 40, 0.4 },
+			border = icons.borders.Rounded,
 			win_options = { winblend = 0 },
 		},
 
 		-- ── Progress window ──────────────────────────────────────────
 		progress = {
-			max_width        = 0.9,
-			min_width        = { 40, 0.4 },
-			border           = icons.borders.Rounded,
+			max_width = 0.9,
+			min_width = { 40, 0.4 },
+			border = icons.borders.Rounded,
 			minimized_border = "none",
-			win_options      = { winblend = 0 },
+			win_options = { winblend = 0 },
 		},
 
 		-- ── Confirmation dialog ──────────────────────────────────────
@@ -282,7 +286,7 @@ return {
 
 		-- ── File view options ────────────────────────────────────────
 		view_options = {
-			show_hidden   = false,
+			show_hidden = false,
 			natural_order = true,
 			---@param name string File or directory name
 			---@return boolean hidden Whether to hide this entry
@@ -303,18 +307,18 @@ return {
 		local hl = vim.api.nvim_set_hl
 
 		-- File operation indicators
-		hl(0, "OilCreate",  { link = "DiagnosticOk" })
-		hl(0, "OilDelete",  { link = "DiagnosticError" })
-		hl(0, "OilMove",    { link = "DiagnosticWarn" })
-		hl(0, "OilCopy",    { link = "DiagnosticInfo" })
-		hl(0, "OilChange",  { link = "DiagnosticHint" })
+		hl(0, "OilCreate", { link = "DiagnosticOk" })
+		hl(0, "OilDelete", { link = "DiagnosticError" })
+		hl(0, "OilMove", { link = "DiagnosticWarn" })
+		hl(0, "OilCopy", { link = "DiagnosticInfo" })
+		hl(0, "OilChange", { link = "DiagnosticHint" })
 		hl(0, "OilRestore", { link = "DiagnosticOk" })
-		hl(0, "OilPurge",   { link = "DiagnosticError" })
+		hl(0, "OilPurge", { link = "DiagnosticError" })
 
 		-- Trash and links
-		hl(0, "OilTrash",           { link = "NonText" })
+		hl(0, "OilTrash", { link = "NonText" })
 		hl(0, "OilTrashSourcePath", { link = "Comment" })
-		hl(0, "OilLink",            { link = "Constant" })
-		hl(0, "OilLinkTarget",      { link = "Comment" })
+		hl(0, "OilLink", { link = "Constant" })
+		hl(0, "OilLinkTarget", { link = "Comment" })
 	end,
 }

@@ -161,11 +161,7 @@ end
 ---@return nil
 ---@private
 local function notify_no_build()
-	vim.notify(
-		"No build tool found (sbt, mill, scala-cli)",
-		vim.log.levels.WARN,
-		{ title = "Scala" }
-	)
+	vim.notify("No build tool found (sbt, mill, scala-cli)", vim.log.levels.WARN, { title = "Scala" })
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -303,9 +299,7 @@ keys.lang_map("scala", "n", "<leader>lT", function()
 	while node do
 		if node:type() == "function_definition" or node:type() == "val_definition" then
 			local name_node = node:field("name")[1] or node:field("pattern")[1]
-			if name_node then
-				test_name = vim.treesitter.get_node_text(name_node, 0)
-			end
+			if name_node then test_name = vim.treesitter.get_node_text(name_node, 0) end
 			break
 		end
 		node = node:parent()
@@ -397,29 +391,27 @@ end, { desc = icons.dev.Debug .. " Debug (metals)" })
 keys.lang_map("scala", "n", "<leader>lm", function()
 	---@type { name: string, cmd: string }[]
 	local actions = {
-		{ name = "Import build",            cmd = "MetalsImportBuild" },
-		{ name = "Restart server",          cmd = "MetalsRestartServer" },
-		{ name = "Organize imports",        cmd = "MetalsOrganizeImports" },
-		{ name = "Show build target",       cmd = "MetalsRunDoctor" },
-		{ name = "New Scala file",          cmd = "MetalsNewScalaFile" },
-		{ name = "Switch build server",     cmd = "MetalsSwitchBsp" },
-		{ name = "Super method hierarchy",  cmd = "MetalsSuperMethodHierarchy" },
-		{ name = "Analyze stacktrace",      cmd = "MetalsAnalyzeStacktrace" },
+		{ name = "Import build", cmd = "MetalsImportBuild" },
+		{ name = "Restart server", cmd = "MetalsRestartServer" },
+		{ name = "Organize imports", cmd = "MetalsOrganizeImports" },
+		{ name = "Show build target", cmd = "MetalsRunDoctor" },
+		{ name = "New Scala file", cmd = "MetalsNewScalaFile" },
+		{ name = "Switch build server", cmd = "MetalsSwitchBsp" },
+		{ name = "Super method hierarchy", cmd = "MetalsSuperMethodHierarchy" },
+		{ name = "Analyze stacktrace", cmd = "MetalsAnalyzeStacktrace" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = scala_icon .. " Metals:" },
 		function(_, idx)
 			if not idx then return end
 			if vim.fn.exists(":" .. actions[idx].cmd) == 2 then
 				vim.cmd(actions[idx].cmd)
 			else
-				vim.notify(
-					"Command not available — is Metals running?",
-					vim.log.levels.WARN,
-					{ title = "Scala" }
-				)
+				vim.notify("Command not available — is Metals running?", vim.log.levels.WARN, { title = "Scala" })
 			end
 		end
 	)
@@ -465,22 +457,24 @@ keys.lang_map("scala", "n", "<leader>ls", function()
 
 	---@type { name: string, cmd: string }[]
 	local actions = {
-		{ name = "compile",        cmd = "sbt compile" },
-		{ name = "clean",          cmd = "sbt clean" },
-		{ name = "clean compile",  cmd = "sbt clean compile" },
-		{ name = "run",            cmd = "sbt run" },
-		{ name = "test",           cmd = "sbt test" },
-		{ name = "console",        cmd = "sbt console" },
-		{ name = "package",        cmd = "sbt package" },
-		{ name = "assembly",       cmd = "sbt assembly" },
-		{ name = "publish",        cmd = "sbt publish" },
-		{ name = "publishLocal",   cmd = "sbt publishLocal" },
-		{ name = "update",         cmd = "sbt update" },
+		{ name = "compile", cmd = "sbt compile" },
+		{ name = "clean", cmd = "sbt clean" },
+		{ name = "clean compile", cmd = "sbt clean compile" },
+		{ name = "run", cmd = "sbt run" },
+		{ name = "test", cmd = "sbt test" },
+		{ name = "console", cmd = "sbt console" },
+		{ name = "package", cmd = "sbt package" },
+		{ name = "assembly", cmd = "sbt assembly" },
+		{ name = "publish", cmd = "sbt publish" },
+		{ name = "publishLocal", cmd = "sbt publishLocal" },
+		{ name = "update", cmd = "sbt update" },
 		{ name = "dependencyTree", cmd = "sbt dependencyTree" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = scala_icon .. " sbt:" },
 		function(_, idx)
 			if not idx then return end
@@ -560,15 +554,17 @@ end, { desc = icons.diagnostics.Info .. " Build info" })
 keys.lang_map("scala", "n", "<leader>lh", function()
 	---@type { name: string, url: string }[]
 	local refs = {
-		{ name = "Scala Docs",    url = "https://docs.scala-lang.org/" },
-		{ name = "Scala API",     url = "https://www.scala-lang.org/api/current/" },
-		{ name = "Metals Docs",   url = "https://scalameta.org/metals/docs/" },
+		{ name = "Scala Docs", url = "https://docs.scala-lang.org/" },
+		{ name = "Scala API", url = "https://www.scala-lang.org/api/current/" },
+		{ name = "Metals Docs", url = "https://scalameta.org/metals/docs/" },
 		{ name = "sbt Reference", url = "https://www.scala-sbt.org/1.x/docs/" },
 		{ name = "Maven Central", url = "https://search.maven.org/" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = scala_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

@@ -123,9 +123,7 @@ keys.lang_group("kotlin", "Kotlin", kt_icon)
 ---@private
 local function detect_build()
 	local cwd = vim.fn.getcwd()
-	if vim.fn.filereadable(cwd .. "/build.gradle.kts") == 1
-		or vim.fn.filereadable(cwd .. "/build.gradle") == 1
-	then
+	if vim.fn.filereadable(cwd .. "/build.gradle.kts") == 1 or vim.fn.filereadable(cwd .. "/build.gradle") == 1 then
 		return "gradle"
 	elseif vim.fn.filereadable(cwd .. "/pom.xml") == 1 then
 		return "maven"
@@ -149,9 +147,7 @@ end
 ---@private
 local function gradle_cmd()
 	local cwd = vim.fn.getcwd()
-	if vim.fn.filereadable(cwd .. "/gradlew") == 1 then
-		return "./gradlew"
-	end
+	if vim.fn.filereadable(cwd .. "/gradlew") == 1 then return "./gradlew" end
 	return "gradle"
 end
 
@@ -165,11 +161,7 @@ end
 ---@private
 local function notify_no_build(context)
 	local tools = context or "gradle, maven, kotlinc"
-	vim.notify(
-		"No build system found (" .. tools .. ")",
-		vim.log.levels.WARN,
-		{ title = "Kotlin" }
-	)
+	vim.notify("No build system found (" .. tools .. ")", vim.log.levels.WARN, { title = "Kotlin" })
 end
 
 --- Run a Gradle task in a terminal split.
@@ -214,9 +206,7 @@ local function run_kotlinc_file(file, args)
 		vim.fn.shellescape(jar),
 		vim.fn.shellescape(jar)
 	)
-	if args and args ~= "" then
-		cmd = cmd .. " " .. args
-	end
+	if args and args ~= "" then cmd = cmd .. " " .. args end
 	vim.cmd.split()
 	vim.cmd.terminal(cmd)
 end
@@ -344,9 +334,7 @@ keys.lang_map("kotlin", "n", "<leader>lT", function()
 	while node do
 		if node:type() == "function_declaration" then
 			local name_node = node:field("name")[1]
-			if name_node then
-				func_name = vim.treesitter.get_node_text(name_node, 0)
-			end
+			if name_node then func_name = vim.treesitter.get_node_text(name_node, 0) end
 			break
 		end
 		node = node:parent()
@@ -458,7 +446,9 @@ keys.lang_map("kotlin", "n", "<leader>lg", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = kt_icon .. " Gradle:" },
 		function(_, idx)
 			if not idx then return end
@@ -582,7 +572,9 @@ keys.lang_map("kotlin", "n", "<leader>lh", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = kt_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

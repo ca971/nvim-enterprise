@@ -414,18 +414,14 @@ keys.lang_map("ruby", "n", "<leader>ls", function()
 	if file:match("_spec%.rb$") then
 		-- spec → source (try app/ first, then lib/)
 		target = file:gsub("spec/", "app/"):gsub("_spec%.rb$", ".rb")
-		if vim.fn.filereadable(target) ~= 1 then
-			target = file:gsub("spec/", "lib/"):gsub("_spec%.rb$", ".rb")
-		end
+		if vim.fn.filereadable(target) ~= 1 then target = file:gsub("spec/", "lib/"):gsub("_spec%.rb$", ".rb") end
 	elseif file:match("_test%.rb$") then
 		-- test → source
 		target = file:gsub("test/", "app/"):gsub("_test%.rb$", ".rb")
 	else
 		-- source → spec (try app/ first, then lib/)
 		target = file:gsub("app/", "spec/"):gsub("%.rb$", "_spec.rb")
-		if vim.fn.filereadable(target) ~= 1 then
-			target = file:gsub("lib/", "spec/"):gsub("%.rb$", "_spec.rb")
-		end
+		if vim.fn.filereadable(target) ~= 1 then target = file:gsub("lib/", "spec/"):gsub("%.rb$", "_spec.rb") end
 	end
 
 	if target and vim.fn.filereadable(target) == 1 then
@@ -494,9 +490,7 @@ end, { desc = icons.diagnostics.Info .. " Gem info" })
 --- Displays a notification if not — individual sub-keymaps
 --- still work regardless (they just run `bin/rails` commands).
 keys.lang_map("ruby", "n", "<leader>la", function()
-	if not is_rails() then
-		vim.notify("Not a Rails project", vim.log.levels.INFO, { title = "Ruby" })
-	end
+	if not is_rails() then vim.notify("Not a Rails project", vim.log.levels.INFO, { title = "Ruby" }) end
 end, { desc = icons.ui.Rocket .. " Rails" })
 
 --- Start the Rails development server.
@@ -540,15 +534,17 @@ end, { desc = icons.ui.Plus .. " Generate" })
 keys.lang_map("ruby", "n", "<leader>lam", function()
 	---@type { name: string, cmd: string }[]
 	local actions = {
-		{ name = "migrate",  cmd = "bin/rails db:migrate" },
+		{ name = "migrate", cmd = "bin/rails db:migrate" },
 		{ name = "rollback", cmd = "bin/rails db:rollback" },
-		{ name = "seed",     cmd = "bin/rails db:seed" },
-		{ name = "reset",    cmd = "bin/rails db:reset" },
-		{ name = "status",   cmd = "bin/rails db:migrate:status" },
+		{ name = "seed", cmd = "bin/rails db:seed" },
+		{ name = "reset", cmd = "bin/rails db:reset" },
+		{ name = "status", cmd = "bin/rails db:migrate:status" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = "Migration:" },
 		function(_, idx)
 			if not idx then return end
@@ -577,14 +573,16 @@ end, { desc = icons.ui.List .. " Routes" })
 keys.lang_map("ruby", "n", "<leader>lad", function()
 	---@type { name: string, cmd: string }[]
 	local actions = {
-		{ name = "create",      cmd = "bin/rails db:create" },
-		{ name = "drop",        cmd = "bin/rails db:drop" },
+		{ name = "create", cmd = "bin/rails db:create" },
+		{ name = "drop", cmd = "bin/rails db:drop" },
 		{ name = "schema:load", cmd = "bin/rails db:schema:load" },
 		{ name = "schema:dump", cmd = "bin/rails db:schema:dump" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = "DB:" },
 		function(_, idx)
 			if not idx then return end

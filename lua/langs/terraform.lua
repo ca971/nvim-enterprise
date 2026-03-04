@@ -184,13 +184,7 @@ end
 ---@private
 local function check_tf()
 	local cmd = tf_cmd()
-	if not cmd then
-		vim.notify(
-			"terraform/tofu not found in PATH",
-			vim.log.levels.ERROR,
-			{ title = "Terraform" }
-		)
-	end
+	if not cmd then vim.notify("terraform/tofu not found in PATH", vim.log.levels.ERROR, { title = "Terraform" }) end
 	return cmd
 end
 
@@ -216,11 +210,7 @@ local function check_tf_initialized()
 	local cmd = check_tf()
 	if not cmd then return nil end
 	if not is_initialized() then
-		vim.notify(
-			"Run init first (terraform init)",
-			vim.log.levels.WARN,
-			{ title = "Terraform" }
-		)
+		vim.notify("Run init first (terraform init)", vim.log.levels.WARN, { title = "Terraform" })
 		return nil
 	end
 	return cmd
@@ -381,18 +371,9 @@ keys.lang_map(tf_fts, "n", "<leader>lv", function()
 		---@type string[]
 		local msgs = {}
 		for _, diag in ipairs(parsed.diagnostics) do
-			msgs[#msgs + 1] = string.format(
-				"[%s] %s: %s",
-				diag.severity,
-				diag.summary,
-				diag.detail or ""
-			)
+			msgs[#msgs + 1] = string.format("[%s] %s: %s", diag.severity, diag.summary, diag.detail or "")
 		end
-		vim.notify(
-			"✗ Validation errors:\n" .. table.concat(msgs, "\n"),
-			vim.log.levels.ERROR,
-			{ title = "Terraform" }
-		)
+		vim.notify("✗ Validation errors:\n" .. table.concat(msgs, "\n"), vim.log.levels.ERROR, { title = "Terraform" })
 	else
 		-- Fallback: JSON parsing failed, use shell exit code
 		if vim.v.shell_error == 0 then
@@ -466,17 +447,23 @@ keys.lang_map(tf_fts, "n", "<leader>ls", function()
 
 	---@type { name: string, cmd: string, prompt?: string }[]
 	local actions = {
-		{ name = "list",              cmd = cmd .. " state list" },
-		{ name = "show…",            cmd = cmd .. " state show",            prompt = "Resource address: " },
-		{ name = "pull (show raw)",  cmd = cmd .. " state pull" },
-		{ name = "rm…",             cmd = cmd .. " state rm",              prompt = "Resource address: " },
-		{ name = "mv…",             cmd = cmd .. " state mv",              prompt = "Source → Dest (space-separated): " },
+		{ name = "list", cmd = cmd .. " state list" },
+		{ name = "show…", cmd = cmd .. " state show", prompt = "Resource address: " },
+		{ name = "pull (show raw)", cmd = cmd .. " state pull" },
+		{ name = "rm…", cmd = cmd .. " state rm", prompt = "Resource address: " },
+		{
+			name = "mv…",
+			cmd = cmd .. " state mv",
+			prompt = "Source → Dest (space-separated): ",
+		},
 		{ name = "replace-provider…", cmd = cmd .. " state replace-provider", prompt = "Old → New: " },
-		{ name = "refresh",          cmd = cmd .. " apply -refresh-only" },
+		{ name = "refresh", cmd = cmd .. " apply -refresh-only" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = tf_icon .. " State:" },
 		function(_, idx)
 			if not idx then return end
@@ -525,22 +512,22 @@ keys.lang_map(tf_fts, "n", "<leader>lw", function()
 	local workspaces = {}
 	for line in ws_result:gmatch("[^\r\n]+") do
 		local clean = line:gsub("^[%s%*]+", ""):gsub("%s+$", "")
-		if clean ~= "" then
-			workspaces[#workspaces + 1] = clean
-		end
+		if clean ~= "" then workspaces[#workspaces + 1] = clean end
 	end
 
 	---@type { name: string, action: string, cmd?: string }[]
 	local actions = {
-		{ name = "list",                                       action = "cmd",    cmd = cmd .. " workspace list" },
-		{ name = "show (current: " .. current_ws .. ")",       action = "cmd",    cmd = cmd .. " workspace show" },
-		{ name = "new…",                                       action = "new" },
-		{ name = "select…",                                    action = "select" },
-		{ name = "delete…",                                    action = "delete" },
+		{ name = "list", action = "cmd", cmd = cmd .. " workspace list" },
+		{ name = "show (current: " .. current_ws .. ")", action = "cmd", cmd = cmd .. " workspace show" },
+		{ name = "new…", action = "new" },
+		{ name = "select…", action = "select" },
+		{ name = "delete…", action = "delete" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = tf_icon .. " Workspace:" },
 		function(_, idx)
 			if not idx then return end
@@ -670,10 +657,7 @@ keys.lang_map(tf_fts, "n", "<leader>lp", function()
 		if idx == 1 then
 			vim.cmd.split()
 			vim.cmd.terminal(
-				cmd .. " providers lock"
-					.. " -platform=linux_amd64"
-					.. " -platform=darwin_amd64"
-					.. " -platform=darwin_arm64"
+				cmd .. " providers lock" .. " -platform=linux_amd64" .. " -platform=darwin_amd64" .. " -platform=darwin_arm64"
 			)
 		elseif idx >= 2 and idx <= 4 then
 			---@type string[]
@@ -730,9 +714,7 @@ keys.lang_map(tf_fts, "n", "<leader>lg", function()
 					local ext = idx2 == 2 and "svg" or "png"
 					local output = vim.fn.getcwd() .. "/terraform-graph." .. ext
 					vim.fn.system(
-						"echo " .. vim.fn.shellescape(result)
-							.. " | dot -T" .. ext
-							.. " -o " .. vim.fn.shellescape(output)
+						"echo " .. vim.fn.shellescape(result) .. " | dot -T" .. ext .. " -o " .. vim.fn.shellescape(output)
 					)
 					vim.notify("Rendered: " .. output, vim.log.levels.INFO, { title = "Terraform" })
 					vim.ui.open(output)
@@ -771,11 +753,7 @@ keys.lang_map(tf_fts, "n", "<leader>le", function()
 		vim.ui.input({ prompt = "Resource ID: " }, function(id)
 			if not id or id == "" then return end
 			vim.cmd.split()
-			vim.cmd.terminal(
-				cmd .. " import "
-					.. vim.fn.shellescape(addr) .. " "
-					.. vim.fn.shellescape(id)
-			)
+			vim.cmd.terminal(cmd .. " import " .. vim.fn.shellescape(addr) .. " " .. vim.fn.shellescape(id))
 		end)
 	end)
 end, { desc = tf_icon .. " Import resource" })
@@ -912,17 +890,16 @@ keys.lang_map(tf_fts, "n", "<leader>lh", function()
 
 	-- ── Contextual resource type detection ───────────────────────
 	---@type string|nil
-	local resource_type = line:match('^resource%s+"([%w_]+)"')
-		or line:match('^data%s+"([%w_]+)"')
+	local resource_type = line:match('^resource%s+"([%w_]+)"') or line:match('^data%s+"([%w_]+)"')
 
 	---@type { name: string, url: string }[]
 	local refs = {
-		{ name = "Terraform Docs",      url = "https://developer.hashicorp.com/terraform/docs" },
-		{ name = "Terraform Registry",  url = "https://registry.terraform.io/" },
-		{ name = "HCL Syntax",          url = "https://developer.hashicorp.com/terraform/language/syntax" },
-		{ name = "Provider: AWS",       url = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs" },
-		{ name = "Provider: Azure",     url = "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs" },
-		{ name = "Provider: GCP",       url = "https://registry.terraform.io/providers/hashicorp/google/latest/docs" },
+		{ name = "Terraform Docs", url = "https://developer.hashicorp.com/terraform/docs" },
+		{ name = "Terraform Registry", url = "https://registry.terraform.io/" },
+		{ name = "HCL Syntax", url = "https://developer.hashicorp.com/terraform/language/syntax" },
+		{ name = "Provider: AWS", url = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs" },
+		{ name = "Provider: Azure", url = "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs" },
+		{ name = "Provider: GCP", url = "https://registry.terraform.io/providers/hashicorp/google/latest/docs" },
 		{ name = "Provider: Kubernetes", url = "https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs" },
 		{ name = "Functions Reference", url = "https://developer.hashicorp.com/terraform/language/functions" },
 	}
@@ -943,7 +920,9 @@ keys.lang_map(tf_fts, "n", "<leader>lh", function()
 	end
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = tf_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

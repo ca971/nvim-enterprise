@@ -138,9 +138,7 @@ local function detect_build_tool()
 	local cwd = vim.fn.getcwd()
 
 	-- ── Strategy 1: stack project file ───────────────────────────────
-	if vim.fn.filereadable(cwd .. "/stack.yaml") == 1 and has_executable("stack") then
-		return "stack"
-	end
+	if vim.fn.filereadable(cwd .. "/stack.yaml") == 1 and has_executable("stack") then return "stack" end
 
 	-- ── Strategy 2: cabal project file ───────────────────────────────
 	if
@@ -452,7 +450,9 @@ keys.lang_map("haskell", "n", "<leader>lp", function()
 	end
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = hs_icon .. " " .. tool .. ":" },
 		function(_, idx)
 			if not idx then return end
@@ -535,7 +535,9 @@ keys.lang_map("haskell", "n", "<leader>lh", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = hs_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

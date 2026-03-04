@@ -140,9 +140,7 @@ end
 ---@return string flag `" --project=."` if `Project.toml` exists, `""` otherwise
 ---@private
 local function get_project_flag()
-	if vim.fn.filereadable("Project.toml") == 1 then
-		return " --project=."
-	end
+	if vim.fn.filereadable("Project.toml") == 1 then return " --project=." end
 	return ""
 end
 
@@ -312,11 +310,7 @@ keys.lang_map("julia", "n", "<leader>ld", function()
 	if not check_julia() then return end
 	vim.cmd("silent! write")
 	local file = vim.fn.expand("%:p")
-	run_julia_cmd(string.format(
-		'julia%s -e "using Debugger; @enter include(\\"%s\\")"',
-		get_project_flag(),
-		file
-	))
+	run_julia_cmd(string.format('julia%s -e "using Debugger; @enter include(\\"%s\\")"', get_project_flag(), file))
 end, { desc = icons.dev.Debug .. " Debug" })
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -337,19 +331,12 @@ keys.lang_map("julia", "n", "<leader>ls", function()
 	if not check_julia() then return end
 	vim.cmd("silent! write")
 	local file = vim.fn.expand("%:p")
-	local result = vim.fn.system(string.format(
-		'julia -e "using JuliaFormatter; format_file(\\"%s\\")" 2>&1',
-		file
-	))
+	local result = vim.fn.system(string.format('julia -e "using JuliaFormatter; format_file(\\"%s\\")" 2>&1', file))
 	if vim.v.shell_error == 0 then
 		vim.cmd.edit()
 		vim.notify("Formatted", vim.log.levels.INFO, { title = "Julia" })
 	else
-		vim.notify(
-			"Format error (install JuliaFormatter.jl?):\n" .. result,
-			vim.log.levels.WARN,
-			{ title = "Julia" }
-		)
+		vim.notify("Format error (install JuliaFormatter.jl?):\n" .. result, vim.log.levels.WARN, { title = "Julia" })
 	end
 end, { desc = jl_icon .. " Format" })
 
@@ -390,7 +377,9 @@ keys.lang_map("julia", "n", "<leader>lp", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = jl_icon .. " Pkg:" },
 		function(_, idx)
 			if not idx then return end
@@ -401,11 +390,7 @@ keys.lang_map("julia", "n", "<leader>lp", function()
 					if not pkg or pkg == "" then return end
 					---@type string
 					local op = action.name:match("^(%w+)")
-					run_julia_cmd(string.format(
-						'julia --project=. -e "using Pkg; Pkg.%s(\\"%s\\")"',
-						op,
-						pkg
-					))
+					run_julia_cmd(string.format('julia --project=. -e "using Pkg; Pkg.%s(\\"%s\\")"', op, pkg))
 				end)
 			else
 				run_julia_cmd(action.cmd --[[@as string]])
@@ -453,7 +438,9 @@ keys.lang_map("julia", "n", "<leader>lh", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = jl_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

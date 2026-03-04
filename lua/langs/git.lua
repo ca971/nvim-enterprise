@@ -224,7 +224,9 @@ keys.lang_map("gitcommit", "n", "<leader>lc", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(t) return string.format("%-10s %s", t.prefix .. ":", t.desc) end, types),
+		vim.tbl_map(function(t)
+			return string.format("%-10s %s", t.prefix .. ":", t.desc)
+		end, types),
 		{ prompt = git_icon .. " Commit type:" },
 		function(_, idx)
 			if not idx then return end
@@ -261,9 +263,7 @@ keys.lang_map("gitcommit", "n", "<leader>la", function()
 			if not email or email == "" then return end
 			local trailer = string.format("Co-authored-by: %s <%s>", name, email)
 			local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-			if lines[#lines] ~= "" and not lines[#lines]:match("^[%w%-]+:") then
-				lines[#lines + 1] = ""
-			end
+			if lines[#lines] ~= "" and not lines[#lines]:match("^[%w%-]+:") then lines[#lines + 1] = "" end
 			lines[#lines + 1] = trailer
 			vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
 			vim.notify("Added: " .. trailer, vim.log.levels.INFO, { title = "Git" })
@@ -296,9 +296,7 @@ keys.lang_map("gitcommit", "n", "<leader>ls", function()
 		end
 	end
 
-	if lines[#lines] ~= "" and not lines[#lines]:match("^[%w%-]+:") then
-		lines[#lines + 1] = ""
-	end
+	if lines[#lines] ~= "" and not lines[#lines]:match("^[%w%-]+:") then lines[#lines + 1] = "" end
 	lines[#lines + 1] = trailer
 	vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
 	vim.notify("Added: " .. trailer, vim.log.levels.INFO, { title = "Git" })
@@ -319,9 +317,7 @@ keys.lang_map("gitcommit", "n", "<leader>lt", function()
 		else
 			-- ── Add as trailer ───────────────────────────────────────
 			local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-			if lines[#lines] ~= "" and not lines[#lines]:match("^[%w%-]+:") then
-				lines[#lines + 1] = ""
-			end
+			if lines[#lines] ~= "" and not lines[#lines]:match("^[%w%-]+:") then lines[#lines + 1] = "" end
 			lines[#lines + 1] = "Refs: " .. ref
 			vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
 		end
@@ -340,9 +336,7 @@ keys.lang_map("gitcommit", "n", "<leader>lb", function()
 		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
 		-- ── Add trailer ──────────────────────────────────────────────
-		if lines[#lines] ~= "" and not lines[#lines]:match("^[%w%-]+:") then
-			lines[#lines + 1] = ""
-		end
+		if lines[#lines] ~= "" and not lines[#lines]:match("^[%w%-]+:") then lines[#lines + 1] = "" end
 		lines[#lines + 1] = "BREAKING CHANGE: " .. desc
 
 		-- ── Add ! to subject line ────────────────────────────────────
@@ -499,9 +493,7 @@ local function rebase_action(action)
 	return function()
 		local line = vim.api.nvim_get_current_line()
 		local new_line = line:gsub("^%w+", action, 1)
-		if new_line ~= line then
-			vim.api.nvim_set_current_line(new_line)
-		end
+		if new_line ~= line then vim.api.nvim_set_current_line(new_line) end
 	end
 end
 
@@ -608,9 +600,7 @@ end, { desc = git_icon .. " List config (scoped)" })
 --- 2. `~/.config/git/config` — XDG-compliant location
 keys.lang_map("gitconfig", "n", "<leader>le", function()
 	local global_config = vim.fn.expand("~/.gitconfig")
-	if vim.fn.filereadable(global_config) ~= 1 then
-		global_config = vim.fn.expand("~/.config/git/config")
-	end
+	if vim.fn.filereadable(global_config) ~= 1 then global_config = vim.fn.expand("~/.config/git/config") end
 	if vim.fn.filereadable(global_config) == 1 then
 		vim.cmd.edit(global_config)
 	else
@@ -662,15 +652,10 @@ keys.lang_map("gitconfig", "n", "<leader>la", function()
 			if not cmd or cmd == "" then return end
 			vim.ui.select({ "global", "local" }, { prompt = git_icon .. " Scope:" }, function(scope)
 				if not scope then return end
-				local result = vim.fn.system(
-					"git config --" .. scope .. " alias." .. name .. " " .. vim.fn.shellescape(cmd) .. " 2>&1"
-				)
+				local result =
+					vim.fn.system("git config --" .. scope .. " alias." .. name .. " " .. vim.fn.shellescape(cmd) .. " 2>&1")
 				if vim.v.shell_error == 0 then
-					vim.notify(
-						string.format("Added %s alias: %s = %s", scope, name, cmd),
-						vim.log.levels.INFO,
-						{ title = "Git" }
-					)
+					vim.notify(string.format("Added %s alias: %s = %s", scope, name, cmd), vim.log.levels.INFO, { title = "Git" })
 					vim.cmd.edit()
 				else
 					vim.notify("Error:\n" .. result, vim.log.levels.ERROR, { title = "Git" })
@@ -788,7 +773,9 @@ keys.lang_map("gitconfig", "n", "<leader>lh", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = git_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

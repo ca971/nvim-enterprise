@@ -85,9 +85,7 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 
 local settings = require("core.settings")
-if not settings:is_language_enabled("css") then
-	return {}
-end
+if not settings:is_language_enabled("css") then return {} end
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- IMPORTS
@@ -205,9 +203,7 @@ keys.lang_map(css_ft, "n", "<leader>ls", function()
 	local props = {}
 	for i = start_line + 1, end_line - 1 do
 		local prop = lines[i]
-		if prop:match("%S") then
-			props[#props + 1] = prop
-		end
+		if prop:match("%S") then props[#props + 1] = prop end
 	end
 
 	table.sort(props, function(a, b)
@@ -238,9 +234,7 @@ keys.lang_map(css_ft, "n", "<leader>lp", function()
 
 	---@type string[]
 	local html_files = vim.fn.glob(dir .. "/*.html", false, true)
-	if #html_files == 0 then
-		html_files = vim.fn.glob(dir .. "/../*.html", false, true)
-	end
+	if #html_files == 0 then html_files = vim.fn.glob(dir .. "/../*.html", false, true) end
 
 	if #html_files == 0 then
 		vim.notify("No HTML file found nearby", vim.log.levels.INFO, { title = "CSS" })
@@ -251,9 +245,7 @@ keys.lang_map(css_ft, "n", "<leader>lp", function()
 		vim.ui.open(html_files[1])
 	else
 		vim.ui.select(html_files, { prompt = "Open HTML file:" }, function(choice)
-			if choice then
-				vim.ui.open(choice)
-			end
+			if choice then vim.ui.open(choice) end
 		end)
 	end
 end, { desc = icons.status.Remote .. " Preview in browser" })
@@ -373,9 +365,7 @@ end, { desc = css_icon .. " CSS reset snippet" })
 --- Works with standard CSS properties, at-rules, pseudo-classes, etc.
 keys.lang_map(css_ft, "n", "<leader>lh", function()
 	local word = vim.fn.expand("<cword>")
-	if word == "" then
-		return
-	end
+	if word == "" then return end
 	vim.ui.open("https://developer.mozilla.org/en-US/docs/Web/CSS/" .. word)
 end, { desc = icons.ui.Note .. " MDN docs" })
 

@@ -114,11 +114,7 @@ keys.lang_group("thrift", "Thrift", thrift_icon)
 ---@private
 local function check_thrift()
 	if vim.fn.executable("thrift") ~= 1 then
-		vim.notify(
-			"thrift compiler not found in PATH",
-			vim.log.levels.ERROR,
-			{ title = "Thrift" }
-		)
+		vim.notify("thrift compiler not found in PATH", vim.log.levels.ERROR, { title = "Thrift" })
 		return false
 	end
 	return true
@@ -150,14 +146,7 @@ keys.lang_map("thrift", "n", "<leader>lg", function()
 	vim.ui.select(targets, { prompt = thrift_icon .. " Target language:" }, function(lang)
 		if not lang then return end
 		vim.cmd.split()
-		vim.cmd.terminal(
-			string.format(
-				"thrift --gen %s -out gen-%s %s",
-				lang,
-				lang,
-				vim.fn.shellescape(file)
-			)
-		)
+		vim.cmd.terminal(string.format("thrift --gen %s -out gen-%s %s", lang, lang, vim.fn.shellescape(file)))
 	end)
 end, { desc = thrift_icon .. " Generate code" })
 
@@ -211,16 +200,18 @@ keys.lang_map("thrift", "n", "<leader>lc", function()
 
 	---@type { name: string, cmd: string }[]
 	local actions = {
-		{ name = "Generate Go",     cmd = "thrift --gen go -out gen-go " .. file },
-		{ name = "Generate Java",   cmd = "thrift --gen java -out gen-java " .. file },
+		{ name = "Generate Go", cmd = "thrift --gen go -out gen-go " .. file },
+		{ name = "Generate Java", cmd = "thrift --gen java -out gen-java " .. file },
 		{ name = "Generate Python", cmd = "thrift --gen py -out gen-py " .. file },
-		{ name = "Generate C++",    cmd = "thrift --gen cpp -out gen-cpp " .. file },
-		{ name = "Generate Rust",   cmd = "thrift --gen rust -out gen-rust " .. file },
-		{ name = "Validate",        cmd = "thrift --audit " .. file },
+		{ name = "Generate C++", cmd = "thrift --gen cpp -out gen-cpp " .. file },
+		{ name = "Generate Rust", cmd = "thrift --gen rust -out gen-rust " .. file },
+		{ name = "Validate", cmd = "thrift --audit " .. file },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = thrift_icon .. " Thrift:" },
 		function(_, idx)
 			if not idx then return end
@@ -275,12 +266,14 @@ keys.lang_map("thrift", "n", "<leader>lh", function()
 	---@type { name: string, url: string }[]
 	local refs = {
 		{ name = "Thrift IDL Spec", url = "https://thrift.apache.org/docs/idl" },
-		{ name = "Thrift Docs",     url = "https://thrift.apache.org/docs/" },
-		{ name = "Thrift GitHub",   url = "https://github.com/apache/thrift" },
+		{ name = "Thrift Docs", url = "https://thrift.apache.org/docs/" },
+		{ name = "Thrift GitHub", url = "https://github.com/apache/thrift" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = thrift_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

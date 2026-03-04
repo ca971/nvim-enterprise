@@ -213,7 +213,9 @@ local function on_attach(bufnr)
 	-- otherwise use gitsigns next_hunk/prev_hunk.
 	map("n", "]h", function()
 		if vim.wo.diff then return "]c" end
-		vim.schedule(function() gs.next_hunk() end)
+		vim.schedule(function()
+			gs.next_hunk()
+		end)
 		return "<Ignore>"
 	end, {
 		expr = true,
@@ -222,7 +224,9 @@ local function on_attach(bufnr)
 
 	map("n", "[h", function()
 		if vim.wo.diff then return "[c" end
-		vim.schedule(function() gs.prev_hunk() end)
+		vim.schedule(function()
+			gs.prev_hunk()
+		end)
 		return "<Ignore>"
 	end, {
 		expr = true,

@@ -58,9 +58,7 @@ local augroup = require("core.utils").augroup
 ---@private
 local function hl_color(name, component)
 	local ok, group = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
-	if ok and group[component] then
-		return string.format("#%06x", group[component])
-	end
+	if ok and group[component] then return string.format("#%06x", group[component]) end
 	return nil
 end
 
@@ -80,39 +78,43 @@ end
 ---@private
 local function apply_highlights()
 	local hl = vim.api.nvim_set_hl
-	local fg = function(name) return hl_color(name, "fg") end
-	local bg = function(name) return hl_color(name, "bg") end
+	local fg = function(name)
+		return hl_color(name, "fg")
+	end
+	local bg = function(name)
+		return hl_color(name, "bg")
+	end
 
 	local float_bg = bg("NormalFloat")
 
 	-- ── Base which-key highlights ────────────────────────────────────
-	hl(0, "WhichKey",          { fg = fg("Function")   or "#7dcfff", bold = true })
-	hl(0, "WhichKeyGroup",     { fg = fg("Keyword")    or "#bb9af7", bold = true })
-	hl(0, "WhichKeyDesc",      { fg = fg("Identifier") or "#c0caf5" })
-	hl(0, "WhichKeySeparator", { fg = fg("Comment")    or "#565f89" })
-	hl(0, "WhichKeyValue",     { fg = fg("Comment")    or "#565f89", italic = true })
+	hl(0, "WhichKey", { fg = fg("Function") or "#7dcfff", bold = true })
+	hl(0, "WhichKeyGroup", { fg = fg("Keyword") or "#bb9af7", bold = true })
+	hl(0, "WhichKeyDesc", { fg = fg("Identifier") or "#c0caf5" })
+	hl(0, "WhichKeySeparator", { fg = fg("Comment") or "#565f89" })
+	hl(0, "WhichKeyValue", { fg = fg("Comment") or "#565f89", italic = true })
 
 	-- Popup background
 	hl(0, "WhichKeyNormal", { link = "NormalFloat" })
-	hl(0, "WhichKeyFloat",  { link = "NormalFloat" })
+	hl(0, "WhichKeyFloat", { link = "NormalFloat" })
 
 	-- Border and title
 	hl(0, "WhichKeyBorder", { fg = fg("FloatBorder") or "#29a4bd", bg = float_bg })
-	hl(0, "WhichKeyTitle",  { fg = fg("FloatTitle")  or "#7dcfff", bg = float_bg, bold = true })
+	hl(0, "WhichKeyTitle", { fg = fg("FloatTitle") or "#7dcfff", bg = float_bg, bold = true })
 
 	-- ── Icon tint palette ────────────────────────────────────────────
 	-- Which-key v3 maps `color` in icon specs to WhichKeyIcon<Color>.
 	-- Each tries to inherit from a semantically appropriate hl group.
 	-- stylua: ignore
 	hl(0, "WhichKeyIconAzure",  { fg = fg("DiagnosticInfo")  or "#73daca" })
-	hl(0, "WhichKeyIconBlue",   { fg = fg("Function")        or "#7aa2f7" })
-	hl(0, "WhichKeyIconCyan",   { fg = fg("Special")         or "#7dcfff" })
-	hl(0, "WhichKeyIconGreen",  { fg = fg("String")          or "#9ece6a" })
-	hl(0, "WhichKeyIconGrey",   { fg = fg("NonText")         or "#545c7e" })
-	hl(0, "WhichKeyIconOrange", { fg = fg("Constant")        or "#ff9e64" })
-	hl(0, "WhichKeyIconPurple", { fg = fg("Statement")       or "#9d7cd8" })
-	hl(0, "WhichKeyIconRed",    { fg = fg("DiagnosticError") or "#f7768e" })
-	hl(0, "WhichKeyIconYellow", { fg = fg("DiagnosticWarn")  or "#e0af68" })
+	hl(0, "WhichKeyIconBlue", { fg = fg("Function") or "#7aa2f7" })
+	hl(0, "WhichKeyIconCyan", { fg = fg("Special") or "#7dcfff" })
+	hl(0, "WhichKeyIconGreen", { fg = fg("String") or "#9ece6a" })
+	hl(0, "WhichKeyIconGrey", { fg = fg("NonText") or "#545c7e" })
+	hl(0, "WhichKeyIconOrange", { fg = fg("Constant") or "#ff9e64" })
+	hl(0, "WhichKeyIconPurple", { fg = fg("Statement") or "#9d7cd8" })
+	hl(0, "WhichKeyIconRed", { fg = fg("DiagnosticError") or "#f7768e" })
+	hl(0, "WhichKeyIconYellow", { fg = fg("DiagnosticWarn") or "#e0af68" })
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -240,8 +242,8 @@ return {
 		---@type wk.Spec
 		spec = {
 			-- Hidden noise mappings
-			{ "<C-/>",  hidden = true },
-			{ "<C-_>",  hidden = true },
+			{ "<C-/>", hidden = true },
+			{ "<C-_>", hidden = true },
 			{ "<C-\\>", hidden = true },
 
 			-- Root leader shortcuts (explicit icons)
@@ -259,8 +261,8 @@ return {
 			{
 				mode = { "n", "v" },
 				{ "<leader>y", icon = { icon = icons.ui.Copy, color = "yellow" } },
-				{ "<leader>p", icon = { icon = "󰅌",           color = "yellow" } },
-				{ "<leader>P", icon = { icon = "󰅌",           color = "yellow" } },
+				{ "<leader>p", icon = { icon = "󰅌", color = "yellow" } },
+				{ "<leader>P", icon = { icon = "󰅌", color = "yellow" } },
 			},
 			{ "<leader>Y", icon = { icon = icons.ui.Copy, color = "yellow" } },
 
@@ -286,17 +288,17 @@ return {
 
 		-- ── Plugins ──────────────────────────────────────────────────
 		plugins = {
-			marks     = true,
+			marks = true,
 			registers = true,
-			spelling  = { enabled = true, suggestions = 20 },
+			spelling = { enabled = true, suggestions = 20 },
 			presets = {
-				operators    = true,
-				motions      = true,
+				operators = true,
+				motions = true,
 				text_objects = true,
-				windows      = true,
-				nav          = true,
-				z            = true,
-				g            = true,
+				windows = true,
+				nav = true,
+				z = true,
+				g = true,
 			},
 		},
 
@@ -304,24 +306,24 @@ return {
 		---@type wk.Win
 		win = {
 			no_overlap = true,
-			border     = settings:get("ui.float_border", "rounded"),
-			padding    = { 1, 2, 1, 2 },
-			title      = true,
-			title_pos  = "center",
-			zindex     = 1000,
-			wo         = { winblend = 8 },
+			border = settings:get("ui.float_border", "rounded"),
+			padding = { 1, 2, 1, 2 },
+			title = true,
+			title_pos = "center",
+			zindex = 1000,
+			wo = { winblend = 8 },
 		},
 
 		-- ── Layout ───────────────────────────────────────────────────
 		layout = {
-			width   = { min = 20 },
+			width = { min = 20 },
 			spacing = 3,
 		},
 
 		-- ── Popup navigation ─────────────────────────────────────────
 		keys = {
 			scroll_down = "<C-d>",
-			scroll_up   = "<C-u>",
+			scroll_up = "<C-u>",
 		},
 
 		-- ── Sort ─────────────────────────────────────────────────────
@@ -338,7 +340,7 @@ return {
 			key = {
 				function(key)
 					local pretty = {
-						["<C-/>"]  = "^/",
+						["<C-/>"] = "^/",
 						["<C-\\>"] = "^\\",
 					}
 					return pretty[key] or require("which-key.view").format(key)
@@ -346,25 +348,25 @@ return {
 			},
 			desc = {
 				{ "<Plug>%(?(.*)%)?", "%1" },
-				{ "^%+",             "" },
-				{ "<[cC]md>",        "" },
-				{ "<[cC][rR]>",      "" },
-				{ "^%s+",            "" },
-				{ "%s+$",            "" },
+				{ "^%+", "" },
+				{ "<[cC]md>", "" },
+				{ "<[cC][rR]>", "" },
+				{ "^%s+", "" },
+				{ "%s+$", "" },
 			},
 		},
 
 		-- ── Icons ────────────────────────────────────────────────────
 		icons = {
 			breadcrumb = icons.ui.ChevronRight,
-			separator  = icons.ui.ArrowRight,
-			group      = "",
-			ellipsis   = icons.ui.Ellipsis,
-			mappings   = true,
-			rules      = icon_rules,
-			colors     = true,
+			separator = icons.ui.ArrowRight,
+			group = "",
+			ellipsis = icons.ui.Ellipsis,
+			mappings = true,
+			rules = icon_rules,
+			colors = true,
 			---@type table<string, string>
-			keys       = {},
+			keys = {},
 		},
 
 		-- ── Display ──────────────────────────────────────────────────

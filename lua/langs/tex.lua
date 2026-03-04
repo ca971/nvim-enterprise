@@ -443,9 +443,7 @@ return {
 		ft = { "tex", "latex", "plaintex" },
 		init = function()
 			-- ── PDF viewer auto-detection ────────────────────────────
-			if has_executable("zathura") then
-				vim.g.vimtex_view_method = "zathura"
-			end
+			if has_executable("zathura") then vim.g.vimtex_view_method = "zathura" end
 
 			vim.g.vimtex_quickfix_mode = 0
 			vim.g.vimtex_mappings_enabled = 0

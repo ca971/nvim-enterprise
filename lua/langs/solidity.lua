@@ -149,8 +149,7 @@ local function detect_framework()
 	if vim.fn.filereadable(cwd .. "/foundry.toml") == 1 then
 		return "foundry"
 	elseif
-		vim.fn.filereadable(cwd .. "/hardhat.config.ts") == 1
-		or vim.fn.filereadable(cwd .. "/hardhat.config.js") == 1
+		vim.fn.filereadable(cwd .. "/hardhat.config.ts") == 1 or vim.fn.filereadable(cwd .. "/hardhat.config.js") == 1
 	then
 		return "hardhat"
 	end
@@ -190,11 +189,7 @@ end
 ---@return nil
 ---@private
 local function notify_no_framework()
-	vim.notify(
-		"No foundry.toml or hardhat.config found",
-		vim.log.levels.WARN,
-		{ title = "Solidity" }
-	)
+	vim.notify("No foundry.toml or hardhat.config found", vim.log.levels.WARN, { title = "Solidity" })
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -411,24 +406,24 @@ keys.lang_map("solidity", "n", "<leader>lc", function()
 
 	if fw == "foundry" then
 		actions = {
-			{ name = "forge build",        cmd = "forge build" },
-			{ name = "forge test",         cmd = "forge test -vvv" },
-			{ name = "forge fmt",          cmd = "forge fmt" },
-			{ name = "forge snapshot",     cmd = "forge snapshot" },
-			{ name = "forge coverage",     cmd = "forge coverage" },
-			{ name = "forge inspect…",     cmd = "forge inspect", prompt = true },
+			{ name = "forge build", cmd = "forge build" },
+			{ name = "forge test", cmd = "forge test -vvv" },
+			{ name = "forge fmt", cmd = "forge fmt" },
+			{ name = "forge snapshot", cmd = "forge snapshot" },
+			{ name = "forge coverage", cmd = "forge coverage" },
+			{ name = "forge inspect…", cmd = "forge inspect", prompt = true },
 			{ name = "anvil (local node)", cmd = "anvil" },
-			{ name = "cast call…",         cmd = "cast call", prompt = true },
+			{ name = "cast call…", cmd = "cast call", prompt = true },
 		}
 	elseif fw == "hardhat" then
 		---@type string
 		local runner = pkg_runner()
 		actions = {
-			{ name = "compile",      cmd = runner .. " hardhat compile" },
-			{ name = "test",         cmd = runner .. " hardhat test" },
+			{ name = "compile", cmd = runner .. " hardhat compile" },
+			{ name = "test", cmd = runner .. " hardhat test" },
 			{ name = "node (local)", cmd = runner .. " hardhat node" },
-			{ name = "clean",        cmd = runner .. " hardhat clean" },
-			{ name = "flatten",      cmd = runner .. " hardhat flatten" },
+			{ name = "clean", cmd = runner .. " hardhat clean" },
+			{ name = "flatten", cmd = runner .. " hardhat flatten" },
 		}
 	else
 		notify_no_framework()
@@ -436,7 +431,9 @@ keys.lang_map("solidity", "n", "<leader>lc", function()
 	end
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = sol_icon .. " Solidity:" },
 		function(_, idx)
 			if not idx then return end
@@ -537,15 +534,17 @@ end, { desc = icons.diagnostics.Info .. " Project info" })
 keys.lang_map("solidity", "n", "<leader>lh", function()
 	---@type { name: string, url: string }[]
 	local refs = {
-		{ name = "Solidity Docs",       url = "https://docs.soliditylang.org/" },
-		{ name = "Foundry Book",        url = "https://book.getfoundry.sh/" },
-		{ name = "Hardhat Docs",        url = "https://hardhat.org/docs" },
-		{ name = "OpenZeppelin",        url = "https://docs.openzeppelin.com/contracts/" },
+		{ name = "Solidity Docs", url = "https://docs.soliditylang.org/" },
+		{ name = "Foundry Book", url = "https://book.getfoundry.sh/" },
+		{ name = "Hardhat Docs", url = "https://hardhat.org/docs" },
+		{ name = "OpenZeppelin", url = "https://docs.openzeppelin.com/contracts/" },
 		{ name = "Solidity by Example", url = "https://solidity-by-example.org/" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = sol_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

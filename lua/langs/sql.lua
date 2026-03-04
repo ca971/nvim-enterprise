@@ -146,11 +146,7 @@ local _db_conn = nil
 ---@private
 local function check_connection()
 	if not _db_conn then
-		vim.notify(
-			"No database connection. Use <leader>lc first.",
-			vim.log.levels.WARN,
-			{ title = "SQL" }
-		)
+		vim.notify("No database connection. Use <leader>lc first.", vim.log.levels.WARN, { title = "SQL" })
 		return false
 	end
 	return true
@@ -207,17 +203,23 @@ keys.lang_map(sql_fts, "n", "<leader>lc", function()
 		{
 			name = "sqlite3",
 			prompt = "Database file: ",
-			builder = function(db) return "sqlite3 " .. vim.fn.shellescape(db) end,
+			builder = function(db)
+				return "sqlite3 " .. vim.fn.shellescape(db)
+			end,
 		},
 		{
 			name = "psql",
 			prompt = "Connection string (or dbname): ",
-			builder = function(db) return "psql " .. vim.fn.shellescape(db) end,
+			builder = function(db)
+				return "psql " .. vim.fn.shellescape(db)
+			end,
 		},
 		{
 			name = "mysql",
 			prompt = "Database: ",
-			builder = function(db) return "mysql " .. db end,
+			builder = function(db)
+				return "mysql " .. db
+			end,
 		},
 	}
 
@@ -226,16 +228,14 @@ keys.lang_map(sql_fts, "n", "<leader>lc", function()
 	end, clients)
 
 	if #available == 0 then
-		vim.notify(
-			"No SQL client found (sqlite3, psql, mysql)",
-			vim.log.levels.WARN,
-			{ title = "SQL" }
-		)
+		vim.notify("No SQL client found (sqlite3, psql, mysql)", vim.log.levels.WARN, { title = "SQL" })
 		return
 	end
 
 	vim.ui.select(
-		vim.tbl_map(function(c) return c.name end, available),
+		vim.tbl_map(function(c)
+			return c.name
+		end, available),
 		{ prompt = sql_icon .. " Database client:" },
 		function(_, idx)
 			if not idx then return end
@@ -247,11 +247,7 @@ keys.lang_map(sql_fts, "n", "<leader>lc", function()
 					db = db,
 					cmd = client.builder(db),
 				}
-				vim.notify(
-					"Connected: " .. client.name .. " → " .. db,
-					vim.log.levels.INFO,
-					{ title = "SQL" }
-				)
+				vim.notify("Connected: " .. client.name .. " → " .. db, vim.log.levels.INFO, { title = "SQL" })
 			end)
 		end
 	)
@@ -294,11 +290,7 @@ keys.lang_map(sql_fts, "n", "<leader>lr", function()
 		vim.cmd.split()
 		vim.cmd.terminal("sqlite3 " .. vim.fn.shellescape(dbs[1]) .. " < " .. vim.fn.shellescape(file))
 	else
-		vim.notify(
-			"No database connection. Use <leader>lc first.",
-			vim.log.levels.WARN,
-			{ title = "SQL" }
-		)
+		vim.notify("No database connection. Use <leader>lc first.", vim.log.levels.WARN, { title = "SQL" })
 	end
 end, { desc = icons.ui.Play .. " Execute file" })
 

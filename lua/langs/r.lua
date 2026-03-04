@@ -314,16 +314,18 @@ keys.lang_map(r_fts, "n", "<leader>ld", function()
 
 	---@type { name: string, cmd: string }[]
 	local actions = {
-		{ name = "renv::init()",     cmd = "Rscript -e 'renv::init()'" },
+		{ name = "renv::init()", cmd = "Rscript -e 'renv::init()'" },
 		{ name = "renv::snapshot()", cmd = "Rscript -e 'renv::snapshot()'" },
-		{ name = "renv::restore()",  cmd = "Rscript -e 'renv::restore()'" },
-		{ name = "renv::status()",   cmd = "Rscript -e 'renv::status()'" },
-		{ name = "renv::update()",   cmd = "Rscript -e 'renv::update()'" },
-		{ name = "renv::clean()",    cmd = "Rscript -e 'renv::clean()'" },
+		{ name = "renv::restore()", cmd = "Rscript -e 'renv::restore()'" },
+		{ name = "renv::status()", cmd = "Rscript -e 'renv::status()'" },
+		{ name = "renv::update()", cmd = "Rscript -e 'renv::update()'" },
+		{ name = "renv::clean()", cmd = "Rscript -e 'renv::clean()'" },
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = r_icon .. " Renv:" },
 		function(_, idx)
 			if not idx then return end
@@ -416,9 +418,9 @@ keys.lang_map(r_fts, "n", "<leader>lh", function()
 
 	---@type { name: string, url: string }[]
 	local refs = {
-		{ name = "R Documentation",    url = "https://www.rdocumentation.org/" },
-		{ name = "CRAN",               url = "https://cran.r-project.org/" },
-		{ name = "Tidyverse",          url = "https://www.tidyverse.org/" },
+		{ name = "R Documentation", url = "https://www.rdocumentation.org/" },
+		{ name = "CRAN", url = "https://cran.r-project.org/" },
+		{ name = "Tidyverse", url = "https://www.tidyverse.org/" },
 		{ name = "R for Data Science", url = "https://r4ds.hadley.nz/" },
 		{ name = "RStudio Cheatsheets", url = "https://posit.co/resources/cheatsheets/" },
 	}
@@ -432,7 +434,9 @@ keys.lang_map(r_fts, "n", "<leader>lh", function()
 	end
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = r_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end

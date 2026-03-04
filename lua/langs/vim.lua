@@ -115,9 +115,7 @@ end
 ---@private
 local function safe_exec(cmd)
 	local ok, err = pcall(vim.cmd, cmd)
-	if ok then
-		return true, nil
-	end
+	if ok then return true, nil end
 	return false, tostring(err)
 end
 
@@ -218,9 +216,7 @@ keys.lang_map("vim", "n", "<leader>lh", function()
 	if not ok then
 		-- Retry with colon prefix for Ex commands
 		ok = pcall(vim.cmd.help, ":" .. word)
-		if not ok then
-			vim.notify("No help for: " .. word, vim.log.levels.INFO, { title = "Vim" })
-		end
+		if not ok then vim.notify("No help for: " .. word, vim.log.levels.INFO, { title = "Vim" }) end
 	end
 end, { desc = icons.ui.Note .. " Help for word" })
 
@@ -249,11 +245,7 @@ keys.lang_map("vim", "n", "<leader>li", function()
 		local varname = prefix .. word
 		local ok, val = pcall(vim.fn.eval, varname)
 		if ok then
-			vim.notify(
-				string.format("%s = %s", varname, vim.inspect(val)),
-				vim.log.levels.INFO,
-				{ title = "Vim: inspect" }
-			)
+			vim.notify(string.format("%s = %s", varname, vim.inspect(val)), vim.log.levels.INFO, { title = "Vim: inspect" })
 			return
 		end
 	end
@@ -269,9 +261,7 @@ keys.lang_map("vim", "n", "<leader>ld", function()
 	local word = vim.fn.expand("<cword>")
 	if word == "" then return end
 	local ok, _ = pcall(vim.cmd, "verbose function " .. word)
-	if not ok then
-		vim.notify("Function not found: " .. word, vim.log.levels.INFO, { title = "Vim" })
-	end
+	if not ok then vim.notify("Function not found: " .. word, vim.log.levels.INFO, { title = "Vim" }) end
 end, { desc = vim_icon .. " Function definition" })
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -298,11 +288,7 @@ keys.lang_map("vim", "n", "<leader>lt", function()
 	local profile_log = vim.fn.tempname() .. "_startup.log"
 	vim.cmd.split()
 	vim.cmd.terminal(
-		string.format(
-			"nvim --startuptime %s -c 'quit' && cat %s | sort -k 2 -n -r | head -30",
-			profile_log,
-			profile_log
-		)
+		string.format("nvim --startuptime %s -c 'quit' && cat %s | sort -k 2 -n -r | head -30", profile_log, profile_log)
 	)
 end, { desc = icons.ui.Perf .. " Profile startup" })
 

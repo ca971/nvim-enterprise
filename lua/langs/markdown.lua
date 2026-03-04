@@ -153,7 +153,7 @@ end
 ---@private
 local function wrap_selection(prefix, suffix)
 	vim.cmd('normal! "zdi' .. prefix .. suffix)
-	vim.cmd('normal! ' .. string.rep("h", #suffix - 1) .. '"zP')
+	vim.cmd("normal! " .. string.rep("h", #suffix - 1) .. '"zP')
 end
 
 --- Extract all headings from the current buffer.
@@ -180,9 +180,7 @@ local function extract_headings()
 	local in_code_block = false
 
 	for i, line in ipairs(lines) do
-		if line:match("^```") then
-			in_code_block = not in_code_block
-		end
+		if line:match("^```") then in_code_block = not in_code_block end
 
 		if not in_code_block then
 			local level_str, title = line:match("^(#+)%s+(.+)$")
@@ -312,11 +310,7 @@ keys.lang_map("markdown", "n", "<leader>lT", function()
 
 	local row = vim.api.nvim_win_get_cursor(0)[1]
 	vim.api.nvim_buf_set_lines(0, row - 1, row - 1, false, toc_lines)
-	vim.notify(
-		string.format("Inserted TOC (%d entries)", #toc_lines - 3),
-		vim.log.levels.INFO,
-		{ title = "Markdown" }
-	)
+	vim.notify(string.format("Inserted TOC (%d entries)", #toc_lines - 3), vim.log.levels.INFO, { title = "Markdown" })
 end, { desc = icons.ui.List .. " Insert TOC" })
 
 --- Generate or refresh table of contents via nvim-toc plugin.
@@ -495,9 +489,7 @@ keys.lang_map("markdown", "n", "<leader>lx", function()
 		new_line = line:gsub("^(%s*)", "%1- [ ] ", 1)
 	end
 
-	if new_line and new_line ~= line then
-		vim.api.nvim_set_current_line(new_line)
-	end
+	if new_line and new_line ~= line then vim.api.nvim_set_current_line(new_line) end
 end, { desc = icons.ui.Check .. " Toggle checkbox" })
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -597,9 +589,26 @@ keys.lang_map("markdown", "n", "<leader>la", "<cmd>TableModeRealign<cr>", {
 keys.lang_map("markdown", "n", "<leader>lc", function()
 	---@type string[]
 	local common_langs = {
-		"bash", "c", "cpp", "css", "dart", "go", "html", "java",
-		"javascript", "json", "kotlin", "lua", "python", "ruby",
-		"rust", "sql", "typescript", "yaml", "zig", "",
+		"bash",
+		"c",
+		"cpp",
+		"css",
+		"dart",
+		"go",
+		"html",
+		"java",
+		"javascript",
+		"json",
+		"kotlin",
+		"lua",
+		"python",
+		"ruby",
+		"rust",
+		"sql",
+		"typescript",
+		"yaml",
+		"zig",
+		"",
 	}
 
 	vim.ui.select(common_langs, { prompt = "Language:" }, function(lang)
@@ -650,19 +659,16 @@ keys.lang_map("markdown", "n", "<leader>le", function()
 		{ ext = "epub", args = "" },
 	}
 
-	local format_names = vim.tbl_map(function(f) return f.ext end, formats)
+	local format_names = vim.tbl_map(function(f)
+		return f.ext
+	end, formats)
 
 	vim.ui.select(format_names, { prompt = "Export to:" }, function(_, idx)
 		if not idx then return end
 		local fmt = formats[idx]
 		local file = vim.fn.expand("%:p")
 		local output = vim.fn.expand("%:p:r") .. "." .. fmt.ext
-		local cmd = string.format(
-			"pandoc %s -o %s %s",
-			vim.fn.shellescape(file),
-			vim.fn.shellescape(output),
-			fmt.args
-		)
+		local cmd = string.format("pandoc %s -o %s %s", vim.fn.shellescape(file), vim.fn.shellescape(output), fmt.args)
 		vim.cmd.split()
 		vim.cmd.terminal(cmd)
 	end)
@@ -713,8 +719,12 @@ keys.lang_map("markdown", "n", "<leader>li", function()
 
 	for _, line in ipairs(lines) do
 		if line:match("^#+%s") then headings = headings + 1 end
-		for _ in line:gmatch("%[.-%]%(.-%)") do links = links + 1 end
-		for _ in line:gmatch("!%[.-%]%(.-%)") do images = images + 1 end
+		for _ in line:gmatch("%[.-%]%(.-%)") do
+			links = links + 1
+		end
+		for _ in line:gmatch("!%[.-%]%(.-%)") do
+			images = images + 1
+		end
 		if line:match("^```") then code_blocks = code_blocks + 1 end
 		if line:match("%- %[ %]") then checkboxes = checkboxes + 1 end
 		if line:match("%- %[[xX]%]") then
@@ -736,8 +746,17 @@ keys.lang_map("markdown", "n", "<leader>li", function()
 			.. "  Images:      %d\n"
 			.. "  Code blocks: %d\n"
 			.. "  Checkboxes:  %d/%d",
-		md_icon, words, line_count, chars, reading_time,
-		headings, links, images, code_blocks, checked, checkboxes
+		md_icon,
+		words,
+		line_count,
+		chars,
+		reading_time,
+		headings,
+		links,
+		images,
+		code_blocks,
+		checked,
+		checkboxes
 	)
 	vim.notify(stats, vim.log.levels.INFO, { title = "Markdown" })
 end, { desc = icons.diagnostics.Info .. " Document stats" })
@@ -816,7 +835,9 @@ keys.lang_map("markdown", "n", "<leader>lO", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(a) return a.name end, actions),
+		vim.tbl_map(function(a)
+			return a.name
+		end, actions),
 		{ prompt = md_icon .. " Obsidian:" },
 		function(_, idx)
 			if idx then vim.cmd(actions[idx].cmd) end
@@ -966,10 +987,15 @@ return {
 			-- ── Buffer-local options for prose filetypes ─────────────
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = {
-					"markdown", "markdown.mdx",
-					"text", "plaintex",
-					"rst", "org", "norg",
-					"gitcommit", "mail",
+					"markdown",
+					"markdown.mdx",
+					"text",
+					"plaintex",
+					"rst",
+					"org",
+					"norg",
+					"gitcommit",
+					"mail",
 				},
 				callback = function()
 					local opt = vim.opt_local
@@ -1026,9 +1052,12 @@ return {
 			formatters = {
 				prettierd = {
 					prepend_args = {
-						"--prose-wrap", "always",
-						"--print-width", "80",
-						"--tab-width", "2",
+						"--prose-wrap",
+						"always",
+						"--print-width",
+						"80",
+						"--tab-width",
+						"2",
 					},
 				},
 			},
@@ -1092,8 +1121,7 @@ return {
 		ft = { "markdown" },
 		cond = function()
 			local cwd = vim.fn.getcwd()
-			return vim.fn.filereadable(cwd .. "/.obsidian/app.json") == 1
-				or vim.fn.isdirectory(cwd .. "/.obsidian") == 1
+			return vim.fn.filereadable(cwd .. "/.obsidian/app.json") == 1 or vim.fn.isdirectory(cwd .. "/.obsidian") == 1
 		end,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
@@ -1104,7 +1132,9 @@ return {
 			workspaces = {
 				{
 					name = "auto",
-					path = function() return vim.fn.getcwd() end,
+					path = function()
+						return vim.fn.getcwd()
+					end,
 				},
 			},
 			completion = {
@@ -1113,24 +1143,24 @@ return {
 			},
 			new_notes_location = "current_dir",
 			note_id_func = function(title)
-				if title ~= nil then
-					return title:gsub(" ", "-"):gsub("[^A-Za-z0-9-]", ""):lower()
-				end
+				if title ~= nil then return title:gsub(" ", "-"):gsub("[^A-Za-z0-9-]", ""):lower() end
 				return tostring(os.time())
 			end,
 			wiki_link_func = function(opts)
-				if opts.id == opts.label then
-					return string.format("[[%s]]", opts.id)
-				end
+				if opts.id == opts.label then return string.format("[[%s]]", opts.id) end
 				return string.format("[[%s|%s]]", opts.id, opts.label)
 			end,
 			mappings = {
 				["gf"] = {
-					action = function() return require("obsidian").util.gf_passthrough() end,
+					action = function()
+						return require("obsidian").util.gf_passthrough()
+					end,
 					opts = { noremap = false, expr = true, buffer = true },
 				},
 				["<leader>oc"] = {
-					action = function() return require("obsidian").util.toggle_checkbox() end,
+					action = function()
+						return require("obsidian").util.toggle_checkbox()
+					end,
 					opts = { buffer = true },
 				},
 			},
@@ -1178,12 +1208,20 @@ return {
 				sign = false,
 				icons = { "󰲡 ", "󰲣 ", "󰲥 ", "󰲧 ", "󰲩 ", "󰲫 " },
 				backgrounds = {
-					"RenderMarkdownH1Bg", "RenderMarkdownH2Bg", "RenderMarkdownH3Bg",
-					"RenderMarkdownH4Bg", "RenderMarkdownH5Bg", "RenderMarkdownH6Bg",
+					"RenderMarkdownH1Bg",
+					"RenderMarkdownH2Bg",
+					"RenderMarkdownH3Bg",
+					"RenderMarkdownH4Bg",
+					"RenderMarkdownH5Bg",
+					"RenderMarkdownH6Bg",
 				},
 				foregrounds = {
-					"RenderMarkdownH1", "RenderMarkdownH2", "RenderMarkdownH3",
-					"RenderMarkdownH4", "RenderMarkdownH5", "RenderMarkdownH6",
+					"RenderMarkdownH1",
+					"RenderMarkdownH2",
+					"RenderMarkdownH3",
+					"RenderMarkdownH4",
+					"RenderMarkdownH5",
+					"RenderMarkdownH6",
 				},
 			},
 			bullet = {
@@ -1314,13 +1352,20 @@ return {
 		opts = {
 			markdown = {
 				headline_highlights = {
-					"Headline1", "Headline2", "Headline3",
-					"Headline4", "Headline5", "Headline6",
+					"Headline1",
+					"Headline2",
+					"Headline3",
+					"Headline4",
+					"Headline5",
+					"Headline6",
 				},
 				bullet_highlights = {
-					"@markup.heading.1.markdown", "@markup.heading.2.markdown",
-					"@markup.heading.3.markdown", "@markup.heading.4.markdown",
-					"@markup.heading.5.markdown", "@markup.heading.6.markdown",
+					"@markup.heading.1.markdown",
+					"@markup.heading.2.markdown",
+					"@markup.heading.3.markdown",
+					"@markup.heading.4.markdown",
+					"@markup.heading.5.markdown",
+					"@markup.heading.6.markdown",
 				},
 				fat_headlines = true,
 				fat_headline_upper_string = "▄",

@@ -88,9 +88,7 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 
 local settings = require("core.settings")
-if not settings:is_language_enabled("cpp") then
-	return {}
-end
+if not settings:is_language_enabled("cpp") then return {} end
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- IMPORTS
@@ -136,15 +134,9 @@ keys.lang_group("cpp", "C++", cpp_icon)
 ---@return string|nil compiler Compiler command name, or `nil` if none found
 ---@private
 local function get_cxx()
-	if vim.fn.executable("g++") == 1 then
-		return "g++"
-	end
-	if vim.fn.executable("clang++") == 1 then
-		return "clang++"
-	end
-	if vim.fn.executable("c++") == 1 then
-		return "c++"
-	end
+	if vim.fn.executable("g++") == 1 then return "g++" end
+	if vim.fn.executable("clang++") == 1 then return "clang++" end
+	if vim.fn.executable("c++") == 1 then return "c++" end
 	return nil
 end
 
@@ -190,13 +182,15 @@ keys.lang_map("cpp", "n", "<leader>lr", function()
 	local file = vim.fn.expand("%:p")
 	local output = vim.fn.expand("%:p:r")
 	vim.cmd.split()
-	vim.cmd.terminal(string.format(
-		"%s -Wall -Wextra -g -std=c++20 -o %s %s && %s",
-		cxx,
-		vim.fn.shellescape(output),
-		vim.fn.shellescape(file),
-		vim.fn.shellescape(output)
-	))
+	vim.cmd.terminal(
+		string.format(
+			"%s -Wall -Wextra -g -std=c++20 -o %s %s && %s",
+			cxx,
+			vim.fn.shellescape(output),
+			vim.fn.shellescape(file),
+			vim.fn.shellescape(output)
+		)
+	)
 end, { desc = icons.ui.Play .. " Run file" })
 
 --- Run a previously compiled binary with user-provided arguments.
@@ -210,9 +204,7 @@ keys.lang_map("cpp", "n", "<leader>lR", function()
 		return
 	end
 	vim.ui.input({ prompt = "Arguments: " }, function(args)
-		if args == nil then
-			return
-		end
+		if args == nil then return end
 		vim.cmd.split()
 		vim.cmd.terminal(vim.fn.shellescape(output) .. " " .. args)
 	end)
@@ -234,12 +226,14 @@ keys.lang_map("cpp", "n", "<leader>lc", function()
 	local file = vim.fn.expand("%:p")
 	local output = vim.fn.expand("%:p:r")
 	vim.cmd.split()
-	vim.cmd.terminal(string.format(
-		"%s -Wall -Wextra -Wpedantic -g -std=c++20 -o %s %s",
-		cxx,
-		vim.fn.shellescape(output),
-		vim.fn.shellescape(file)
-	))
+	vim.cmd.terminal(
+		string.format(
+			"%s -Wall -Wextra -Wpedantic -g -std=c++20 -o %s %s",
+			cxx,
+			vim.fn.shellescape(output),
+			vim.fn.shellescape(file)
+		)
+	)
 end, { desc = cpp_icon .. " Compile (debug -g)" })
 
 --- Compile the current file with optimizations.
@@ -257,12 +251,14 @@ keys.lang_map("cpp", "n", "<leader>lC", function()
 	local file = vim.fn.expand("%:p")
 	local output = vim.fn.expand("%:p:r")
 	vim.cmd.split()
-	vim.cmd.terminal(string.format(
-		"%s -Wall -Wextra -O2 -DNDEBUG -std=c++20 -o %s %s",
-		cxx,
-		vim.fn.shellescape(output),
-		vim.fn.shellescape(file)
-	))
+	vim.cmd.terminal(
+		string.format(
+			"%s -Wall -Wextra -O2 -DNDEBUG -std=c++20 -o %s %s",
+			cxx,
+			vim.fn.shellescape(output),
+			vim.fn.shellescape(file)
+		)
+	)
 end, { desc = cpp_icon .. " Compile (optimized -O2)" })
 
 --- Build the project using Make.
@@ -403,9 +399,7 @@ keys.lang_map("cpp", "n", "<leader>lh", function()
 		end, refs),
 		{ prompt = cpp_icon .. " Lookup '" .. word .. "':" },
 		function(_, idx)
-			if not idx then
-				return
-			end
+			if not idx then return end
 			if refs[idx].url then
 				vim.ui.open(refs[idx].url)
 			elseif refs[idx].action == "man" then
@@ -413,9 +407,7 @@ keys.lang_map("cpp", "n", "<leader>lh", function()
 				local ok = pcall(vim.cmd, "Man 3 " .. word)
 				if not ok then
 					ok = pcall(vim.cmd, "Man 2 " .. word)
-					if not ok then
-						pcall(vim.cmd, "Man " .. word)
-					end
+					if not ok then pcall(vim.cmd, "Man " .. word) end
 				end
 			end
 		end
@@ -460,13 +452,15 @@ keys.lang_map("cpp", "n", "<leader>la", function()
 	local file = vim.fn.expand("%:p")
 	local asm_file = vim.fn.expand("%:p:r") .. ".s"
 	vim.cmd.split()
-	vim.cmd.terminal(string.format(
-		"%s -S -masm=intel -std=c++20 -o %s %s && cat %s",
-		cxx,
-		vim.fn.shellescape(asm_file),
-		vim.fn.shellescape(file),
-		vim.fn.shellescape(asm_file)
-	))
+	vim.cmd.terminal(
+		string.format(
+			"%s -S -masm=intel -std=c++20 -o %s %s && cat %s",
+			cxx,
+			vim.fn.shellescape(asm_file),
+			vim.fn.shellescape(file),
+			vim.fn.shellescape(asm_file)
+		)
+	)
 end, { desc = cpp_icon .. " Assembly output" })
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -537,9 +531,7 @@ keys.lang_map("cpp", "n", "<leader>lp", function()
 		return
 	end
 	vim.cmd.split()
-	vim.cmd.terminal(
-		"valgrind --leak-check=full --show-reachable=yes --track-origins=yes " .. vim.fn.shellescape(output)
-	)
+	vim.cmd.terminal("valgrind --leak-check=full --show-reachable=yes --track-origins=yes " .. vim.fn.shellescape(output))
 end, { desc = icons.ui.Bug .. " Valgrind (memory check)" })
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -715,9 +707,7 @@ keys.lang_map("cpp", "n", "<leader>lmt", function()
 		vim.ui.select(build_types, { prompt = "Build type:" }, function(choice)
 			if choice then
 				vim.cmd.split()
-				vim.cmd.terminal(
-					"cmake -B build -DCMAKE_BUILD_TYPE=" .. choice .. " -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
-				)
+				vim.cmd.terminal("cmake -B build -DCMAKE_BUILD_TYPE=" .. choice .. " -DCMAKE_EXPORT_COMPILE_COMMANDS=ON")
 			end
 		end)
 	end

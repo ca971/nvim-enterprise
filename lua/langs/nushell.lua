@@ -385,7 +385,9 @@ keys.lang_map("nu", "n", "<leader>lh", function()
 	}
 
 	vim.ui.select(
-		vim.tbl_map(function(r) return r.name end, refs),
+		vim.tbl_map(function(r)
+			return r.name
+		end, refs),
 		{ prompt = nu_icon .. " Documentation:" },
 		function(_, idx)
 			if idx then vim.ui.open(refs[idx].url) end
@@ -519,15 +521,10 @@ return {
 						vim.lsp.start({
 							name = "nushell",
 							cmd = { "nu", "--lsp" },
-							root_dir = vim.fs.dirname(
-								vim.fs.find(
-									{ "env.nu", "config.nu", ".git" },
-									{
-										upward = true,
-										path = vim.api.nvim_buf_get_name(args.buf),
-									}
-								)[1]
-							) or vim.fn.getcwd(),
+							root_dir = vim.fs.dirname(vim.fs.find({ "env.nu", "config.nu", ".git" }, {
+								upward = true,
+								path = vim.api.nvim_buf_get_name(args.buf),
+							})[1]) or vim.fn.getcwd(),
 							filetypes = { "nu" },
 						})
 					end
