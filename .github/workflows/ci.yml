@@ -88,8 +88,119 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Extract version
+        id: version
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -v "^${TAG}$" | head -1)
+
+          # Build changelog from commits
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s" --no-merges)
+            COMPARE="**Full Changelog**: https://github.com/ca971/nvim-enterprise/compare/${PREVIOUS_TAG}...${TAG}"
+          else
+            CHANGES=$(git log --pretty=format:"- %s" --no-merges)
+            COMPARE=""
+          fi
+
+          # Count stats
+          LUA_FILES=$(find lua -name "*.lua" | wc -l | tr -d ' ')
+          LANG_COUNT=$(find lua/langs -name "*.lua" ! -name "_template.lua" ! -name "init.lua" | wc -l | tr -d ' ')
+          PLUGIN_DIRS=$(find lua/plugins -mindepth 2 -name "*.lua" ! -name "init.lua" | wc -l | tr -d ' ')
+
+          cat > /tmp/release-notes.md << EOF
+          <div align="center">
+
+          # <img src="https://neovim.io/logos/neovim-mark.svg" width="28" height="28" /> NvimEnterprise ${TAG}
+
+          **Enterprise-Grade · Multi-User · Cross-Platform · Ultra-Modular**
+
+          </div>
+
+          ---
+
+          ## ✨ Highlights
+
+          | Feature | Details |
+          |---|---|
+          | 🏗️ **Architecture** | OOP class system with inheritance and mixins |
+          | 👥 **Multi-User** | Isolated namespaces — hot-swap at runtime |
+          | 🌍 **Languages** | ${LANG_COUNT}+ language modules (plug-and-play) |
+          | 🔌 **Plugins** | ${PLUGIN_DIRS}+ pre-configured plugins (lazy-loaded) |
+          | 🤖 **AI** | 4 integrations — Copilot · Avante · CodeCompanion · Continue |
+          | 🌐 **Platform** | macOS · Linux · Windows · WSL · BSD · Docker · SSH |
+          | 🛡️ **Security** | Sandbox loading, path validation, zero telemetry |
+          | ⚡ **Performance** | Startup < 50ms — fully lazy-loaded |
+
+          ---
+
+          ## 📋 What's Changed
+
+          ${CHANGES}
+
+          ---
+
+          ## 📦 Quick Install
+
+          **macOS & Linux:**
+          \`\`\`bash
+          curl -fsSL https://raw.githubusercontent.com/ca971/nvim-enterprise/main/install.sh | bash
+          \`\`\`
+
+          **Windows (PowerShell):**
+          \`\`\`powershell
+          git clone https://github.com/ca971/nvim-enterprise.git "\$env:LOCALAPPDATA\nvim"
+          nvim
+          \`\`\`
+
+          **Manual:**
+          \`\`\`bash
+          git clone https://github.com/ca971/nvim-enterprise.git ~/.config/nvim
+          nvim
+          \`\`\`
+
+          ---
+
+          ## 📊 Stats
+
+          | Metric | Value |
+          |---|---|
+          | Lua files | ${LUA_FILES} |
+          | Language modules | ${LANG_COUNT}+ |
+          | Plugin configs | ${PLUGIN_DIRS}+ |
+          | Startup time | < 50ms |
+          | Neovim required | ≥ 0.10.0 |
+
+          ---
+
+          ## 🔗 Links
+
+          - 📖 [Documentation](https://github.com/ca971/nvim-enterprise#readme)
+          - 🐛 [Report a Bug](https://github.com/ca971/nvim-enterprise/issues/new)
+          - 💡 [Request a Feature](https://github.com/ca971/nvim-enterprise/issues/new)
+          - 🤝 [Contributing Guide](https://github.com/ca971/nvim-enterprise/blob/main/CONTRIBUTING.md)
+
+          ${COMPARE}
+
+          ---
+
+          <div align="center">
+
+          **Crafted with ❤️ by [ca971](https://github.com/ca971) — for dev teams and enterprise.**
+
+          </div>
+          EOF
+
+          # Remove leading spaces from heredoc
+          sed -i 's/^          //' /tmp/release-notes.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          name: "${{ steps.version.outputs.tag }} — NvimEnterprise"
+          body_path: /tmp/release-notes.md
           make_latest: true
