@@ -136,6 +136,7 @@ local RUNTIME_EXECUTABLES = {
 	terraform = "terraform",
 	vim = "vim",
 	zig = "zig",
+	dart = "dart",
 }
 
 -- ═══════════════════════════════════════════════════════════════════════
