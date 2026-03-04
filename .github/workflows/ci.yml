@@ -49,17 +49,26 @@ jobs:
         run: |
           errors=0
           while IFS= read -r file; do
-            if ! nvim --headless --clean -l "$file" 2>/tmp/err.log; then
+            output=$(nvim --headless --clean -c "
+              local ok, err = loadfile('$file')
+              if not ok then
+                io.stderr:write(err .. '\n')
+                vim.cmd('cquit 1')
+              else
+                vim.cmd('quitall')
+              end
+            " 2>&1)
+            if [ $? -ne 0 ]; then
               echo "❌ $file"
-              cat /tmp/err.log
+              echo "$output"
               errors=$((errors + 1))
             fi
           done < <(find lua -name "*.lua")
           if [ "$errors" -gt 0 ]; then
-            echo "❌ $errors file(s) with errors"
+            echo "❌ $errors file(s) with syntax errors"
             exit 1
           fi
-          echo "✅ All Lua files valid"
+          echo "✅ All Lua files have valid syntax"
 
       - name: Test Neovim startup
         run: |
