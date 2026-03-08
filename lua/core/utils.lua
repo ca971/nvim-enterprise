@@ -1196,13 +1196,11 @@ function M.icon(category, name, opts)
 	local after_str = ""
 
 	if opts.before then
-		before_str = type(opts.before) == "string" and opts.before --[[@as string]]
-			or " "
+		before_str = type(opts.before) == "string" and opts.before --[[@as string]] or " "
 	end
 
 	if opts.after then
-		after_str = type(opts.after) == "string" and opts.after --[[@as string]]
-			or " "
+		after_str = type(opts.after) == "string" and opts.after --[[@as string]] or " "
 	end
 
 	return before_str .. glyph .. after_str
