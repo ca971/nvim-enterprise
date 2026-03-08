@@ -638,7 +638,7 @@ or commercial purposes.
 
 <img src="https://neovim.io/logos/neovim-mark.svg" width="24" height="24" alt="Neovim" />
 
-**Crafted with ❤️ by ca971 (Christian ACHILLE), for dev teams and enterprise.**
+**Crafted with ❤️ by [ca971](https://github.com/ca971) - Christian ACHILLE, for dev teams and enterprise.**
 
 [⬆ Back to Top](#-nvimenterprise)
 
