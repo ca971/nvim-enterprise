@@ -103,19 +103,12 @@ jobs:
           VERSION=$(timeout 30 nvim --headless -c "lua print(require('core.version').string())" -c "quitall" 2>&1 | tail -1)
           echo "✅ Version: ${VERSION}"
 
-  # =========================================================
-  # Conditional jobs - Only run on tag push
-  # =========================================================
-
   version:
     name: Version Consistency
-    if: startsWith(github.ref, 'refs/tags/v') # ← CHANGEMENT CLÉ
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install LuaJIT
-        run: sudo apt-get update && sudo apt-get install -y luajit
 
       - name: Verify version.lua exists
         run: |
@@ -128,19 +121,24 @@ jobs:
       - name: Verify tag matches version.lua
         run: |
           TAG="${GITHUB_REF#refs/tags/v}"
-          LUA_VERSION=$(luajit -e "
-            local v = dofile('lua/core/version.lua')
-            print(v.string())
-          " 2>/dev/null || echo "PARSE_ERROR")
 
-          if [ "$LUA_VERSION" = "PARSE_ERROR" ]; then
-            echo "❌ Failed to parse lua/core/version.lua"
+          MAJOR=$(grep -E '^\s+major\s*=' lua/core/version.lua | head -1 | grep -oE '[0-9]+')
+          MINOR=$(grep -E '^\s+minor\s*=' lua/core/version.lua | head -1 | grep -oE '[0-9]+')
+          PATCH=$(grep -E '^\s+patch\s*=' lua/core/version.lua | head -1 | grep -oE '[0-9]+')
+
+          if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+            echo "❌ Failed to parse version fields from lua/core/version.lua"
+            grep -E '^\s+(major|minor|patch)\s*=' lua/core/version.lua
             exit 1
           fi
 
+          LUA_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+
+          echo "  Tag:          v${TAG}"
+          echo "  version.lua:  ${LUA_VERSION}"
+
           if [ "$TAG" != "$LUA_VERSION" ]; then
             echo "❌ Tag v${TAG} does not match version.lua (${LUA_VERSION})"
-            echo "   Update lua/core/version.lua before tagging"
             exit 1
           fi
           echo "✅ Tag v${TAG} matches version.lua (${LUA_VERSION})"
@@ -170,23 +168,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install LuaJIT
-        run: sudo apt-get update && sudo apt-get install -y luajit
-
       - name: Extract version
         id: version
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
-        id: notes
         run: |
           TAG="${{ steps.version.outputs.tag }}"
           PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -v "^${TAG}$" | head -1)
 
-          LUA_VERSION=$(luajit -e "
-            local v = dofile('lua/core/version.lua')
-            print(v.string())
-          " 2>/dev/null || echo "${TAG#v}")
+          V_MAJOR=$(grep -E '^\s+major\s*=' lua/core/version.lua | head -1 | grep -oE '[0-9]+')
+          V_MINOR=$(grep -E '^\s+minor\s*=' lua/core/version.lua | head -1 | grep -oE '[0-9]+')
+          V_PATCH=$(grep -E '^\s+patch\s*=' lua/core/version.lua | head -1 | grep -oE '[0-9]+')
+          LUA_VERSION="${V_MAJOR}.${V_MINOR}.${V_PATCH}"
 
           if [ -n "$PREVIOUS_TAG" ]; then
             CHANGES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s" --no-merges)
@@ -205,110 +199,95 @@ jobs:
           LANG_COUNT=$(find lua/langs -name "*.lua" ! -name "_template.lua" ! -name "init.lua" | wc -l | tr -d ' ')
           PLUGIN_DIRS=$(find lua/plugins -mindepth 2 -name "*.lua" ! -name "init.lua" | wc -l | tr -d ' ')
 
-          cat > /tmp/release-notes.md << 'ENDOFNOTES'
-          <div align="center">
+          {
+            echo '<div align="center">'
+            echo ""
+            echo "# <img src=\"https://neovim.io/logos/neovim-mark.svg\" width=\"28\" height=\"28\" /> NvimEnterprise ${TAG}"
+            echo ""
+            echo "**Enterprise-Grade · Multi-User · Cross-Platform · Ultra-Modular**"
+            echo ""
+            echo '</div>'
+            echo ""
+            echo "---"
+            echo ""
+            echo "## ✨ Highlights"
+            echo ""
+            echo "| Feature | Details |"
+            echo "|---|---|"
+            echo "| 🏗️ **Architecture** | OOP class system with inheritance and mixins |"
+            echo "| 👥 **Multi-User** | Isolated namespaces — hot-swap at runtime |"
+            echo "| 🌍 **Languages** | ${LANG_COUNT}+ language modules (plug-and-play) |"
+            echo "| 🔌 **Plugins** | ${PLUGIN_DIRS}+ pre-configured plugins (lazy-loaded) |"
+            echo "| 🤖 **AI** | 4 integrations — Copilot · Avante · CodeCompanion · Continue |"
+            echo "| 🌐 **Platform** | macOS · Linux · Windows · WSL · BSD · Docker · SSH |"
+            echo "| 🛡️ **Security** | Sandbox loading, path validation, zero telemetry |"
+            echo "| ⚡ **Performance** | Startup < 50ms — fully lazy-loaded |"
+            echo "| 📋 **Versioning** | SemVer ${LUA_VERSION} — CHANGELOG + automated releases |"
+            echo ""
+            echo "---"
 
-          # <img src="https://neovim.io/logos/neovim-mark.svg" width="28" height="28" /> NvimEnterprise ${TAG}
+            if [ -n "$CHANGELOG_SECTION" ]; then
+              echo ""
+              echo "## 📋 What's Changed"
+              echo ""
+              echo "$CHANGELOG_SECTION"
+              echo ""
+              echo "---"
+            fi
 
-          **Enterprise-Grade · Multi-User · Cross-Platform · Ultra-Modular**
-
-          </div>
-
-          ---
-
-          ## ✨ Highlights
-
-          | Feature | Details |
-          |---|---|
-          | 🏗️ **Architecture** | OOP class system with inheritance and mixins |
-          | 👥 **Multi-User** | Isolated namespaces — hot-swap at runtime |
-          | 🌍 **Languages** | ${LANG_COUNT}+ language modules (plug-and-play) |
-          | 🔌 **Plugins** | ${PLUGIN_DIRS}+ pre-configured plugins (lazy-loaded) |
-          | 🤖 **AI** | 4 integrations — Copilot · Avante · CodeCompanion · Continue |
-          | 🌐 **Platform** | macOS · Linux · Windows · WSL · BSD · Docker · SSH |
-          | 🛡️ **Security** | Sandbox loading, path validation, zero telemetry |
-          | ⚡ **Performance** | Startup < 50ms — fully lazy-loaded |
-          | 📋 **Versioning** | SemVer ${LUA_VERSION} — CHANGELOG + automated releases |
-
-          ---
-          ENDOFNOTES
-
-          if [ -n "$CHANGELOG_SECTION" ]; then
-            echo "" >> /tmp/release-notes.md
-            echo "## 📋 What's Changed (from CHANGELOG)" >> /tmp/release-notes.md
-            echo "" >> /tmp/release-notes.md
-            echo "$CHANGELOG_SECTION" >> /tmp/release-notes.md
-            echo "" >> /tmp/release-notes.md
-            echo "---" >> /tmp/release-notes.md
-          fi
-
-          cat >> /tmp/release-notes.md << ENDOFNOTES
-
-          ## 📋 Commits
-
-          ${CHANGES}
-
-          ---
-
-          ## 📦 Quick Install
-
-          **macOS & Linux:**
-          \`\`\`bash
-          curl -fsSL https://raw.githubusercontent.com/ca971/nvim-enterprise/main/install.sh | bash
-          \`\`\`
-
-          **Windows (PowerShell):**
-          \`\`\`powershell
-          git clone https://github.com/ca971/nvim-enterprise.git "\$env:LOCALAPPDATA\nvim"
-          nvim
-          \`\`\`
-
-          **Manual:**
-          \`\`\`bash
-          git clone https://github.com/ca971/nvim-enterprise.git ~/.config/nvim
-          nvim
-          \`\`\`
-
-          ---
-
-          ## 📊 Stats
-
-          | Metric | Value |
-          |---|---|
-          | Lua files | ${LUA_FILES} |
-          | Language modules | ${LANG_COUNT}+ |
-          | Plugin configs | ${PLUGIN_DIRS}+ |
-          | Startup time | < 50ms |
-          | Neovim required | ≥ 0.10.0 |
-
-          ---
-
-          ## ��� Links
-
-          - 📖 [Documentation](https://github.com/ca971/nvim-enterprise#readme)
-          - 📋 [CHANGELOG](https://github.com/ca971/nvim-enterprise/blob/main/CHANGELOG.md)
-          - 🐛 [Report a Bug](https://github.com/ca971/nvim-enterprise/issues/new)
-          - 💡 [Request a Feature](https://github.com/ca971/nvim-enterprise/issues/new)
-          - 🤝 [Contributing Guide](https://github.com/ca971/nvim-enterprise/blob/main/CONTRIBUTING.md)
-
-          ${COMPARE}
-
-          ---
-
-          <div align="center">
-
-          **Crafted with ❤️ by [ca971](https://github.com/ca971) — for dev teams and enterprise.**
-
-          </div>
-          ENDOFNOTES
-
-          sed -i 's/^          //' /tmp/release-notes.md
-
-          sed -i "s/\${TAG}/${TAG}/g" /tmp/release-notes.md
-          sed -i "s/\${LUA_VERSION}/${LUA_VERSION}/g" /tmp/release-notes.md
-          sed -i "s/\${LANG_COUNT}/${LANG_COUNT}/g" /tmp/release-notes.md
-          sed -i "s/\${PLUGIN_DIRS}/${PLUGIN_DIRS}/g" /tmp/release-notes.md
-          sed -i "s/\${LUA_FILES}/${LUA_FILES}/g" /tmp/release-notes.md
+            echo ""
+            echo "## 📋 Commits"
+            echo ""
+            echo "$CHANGES"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📦 Quick Install"
+            echo ""
+            echo "**macOS & Linux:**"
+            echo '```bash'
+            echo "curl -fsSL https://raw.githubusercontent.com/ca971/nvim-enterprise/main/install.sh | bash"
+            echo '```'
+            echo ""
+            echo "**Windows (PowerShell):**"
+            echo '```powershell'
+            echo 'git clone https://github.com/ca971/nvim-enterprise.git "$env:LOCALAPPDATA\nvim"'
+            echo "nvim"
+            echo '```'
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📊 Stats"
+            echo ""
+            echo "| Metric | Value |"
+            echo "|---|---|"
+            echo "| Lua files | ${LUA_FILES} |"
+            echo "| Language modules | ${LANG_COUNT}+ |"
+            echo "| Plugin configs | ${PLUGIN_DIRS}+ |"
+            echo "| Startup time | < 50ms |"
+            echo "| Neovim required | ≥ 0.10.0 |"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 🔗 Links"
+            echo ""
+            echo "- 📖 [Documentation](https://github.com/ca971/nvim-enterprise#readme)"
+            echo "- 📋 [CHANGELOG](https://github.com/ca971/nvim-enterprise/blob/main/CHANGELOG.md)"
+            echo "- 🐛 [Report a Bug](https://github.com/ca971/nvim-enterprise/issues/new)"
+            echo "- 🤝 [Contributing](https://github.com/ca971/nvim-enterprise/blob/main/CONTRIBUTING.md)"
+            echo ""
+            if [ -n "$COMPARE" ]; then
+              echo "$COMPARE"
+              echo ""
+            fi
+            echo "---"
+            echo ""
+            echo '<div align="center">'
+            echo ""
+            echo "**Crafted with ❤️ by [ca971](https://github.com/ca971) — for dev teams and enterprise.**"
+            echo ""
+            echo '</div>'
+          } > /tmp/release-notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
