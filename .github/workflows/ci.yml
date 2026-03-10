@@ -39,13 +39,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install LuaJIT
+        run: sudo apt-get update && sudo apt-get install -y luajit
+
+      - name: Validate Lua syntax (LuaJIT)
+        run: |
+          errors=0
+          while IFS= read -r -d '' f; do
+            if ! luajit -bl "$f" /dev/null 2>/dev/null; then
+              echo "  ✗ $f"
+              luajit -bl "$f" /dev/null 2>&1 | sed 's/^/    /'
+              errors=$((errors + 1))
+            fi
+          done < <(find lua -name '*.lua' -print0)
+
+          if [ $errors -gt 0 ]; then
+            echo "❌ $errors Lua syntax error(s)"
+            exit 1
+          fi
+          echo "✅ All Lua files have valid syntax"
+
       - name: Install luacheck
         run: |
-          sudo apt-get update
           sudo apt-get install -y luarocks
           sudo luarocks install luacheck
 
-      - name: Validate Lua syntax
+      - name: Luacheck analysis
         run: |
           luacheck lua/ \
             --no-color \
@@ -54,7 +73,59 @@ jobs:
             --globals vim \
             --only 0 \
             --no-unused
-          echo "✅ All Lua files have valid syntax"
+          echo "✅ Luacheck passed"
+
+  version:
+    name: Version Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LuaJIT
+        run: sudo apt-get update && sudo apt-get install -y luajit
+
+      - name: Verify version.lua exists
+        run: |
+          if [ ! -f "lua/core/version.lua" ]; then
+            echo "❌ lua/core/version.lua not found"
+            exit 1
+          fi
+          echo "✅ version.lua exists"
+
+      - name: Verify tag matches version.lua (on tag push)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          LUA_VERSION=$(luajit -e "
+            local v = dofile('lua/core/version.lua')
+            print(v.string())
+          " 2>/dev/null || echo "PARSE_ERROR")
+
+          if [ "$LUA_VERSION" = "PARSE_ERROR" ]; then
+            echo "❌ Failed to parse lua/core/version.lua"
+            exit 1
+          fi
+
+          if [ "$TAG" != "$LUA_VERSION" ]; then
+            echo "❌ Tag v${TAG} does not match version.lua (${LUA_VERSION})"
+            echo "   Update lua/core/version.lua before tagging"
+            exit 1
+          fi
+          echo "✅ Tag v${TAG} matches version.lua (${LUA_VERSION})"
+
+      - name: Verify CHANGELOG entry (on tag push)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          if [ -f "CHANGELOG.md" ]; then
+            if grep -q "\[${TAG}\]" CHANGELOG.md; then
+              echo "✅ CHANGELOG.md contains [${TAG}]"
+            else
+              echo "⚠️  CHANGELOG.md missing [${TAG}] entry (warning only)"
+            fi
+          else
+            echo "⚠️  CHANGELOG.md not found (warning only)"
+          fi
 
   startup:
     name: Neovim Startup
@@ -76,9 +147,17 @@ jobs:
           timeout 30 nvim --headless -c "lua print('✅ Neovim loaded successfully')" -c "quitall" 2>&1
           echo "✅ Startup test passed"
 
+      - name: Test version command
+        run: |
+          export HOME=$(mktemp -d)
+          mkdir -p $HOME/.config
+          ln -s $GITHUB_WORKSPACE $HOME/.config/nvim
+          VERSION=$(timeout 30 nvim --headless -c "lua print(require('core.version').string())" -c "quitall" 2>&1 | tail -1)
+          echo "✅ Version: ${VERSION}"
+
   release:
     name: Create Release
-    needs: [lint, syntax, startup]
+    needs: [lint, syntax, version, startup]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -87,6 +166,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Install LuaJIT
+        run: sudo apt-get update && sudo apt-get install -y luajit
 
       - name: Extract version
         id: version
@@ -98,6 +180,12 @@ jobs:
           TAG="${{ steps.version.outputs.tag }}"
           PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -v "^${TAG}$" | head -1)
 
+          # Extract version from version.lua
+          LUA_VERSION=$(luajit -e "
+            local v = dofile('lua/core/version.lua')
+            print(v.string())
+          " 2>/dev/null || echo "${TAG#v}")
+
           # Build changelog from commits
           if [ -n "$PREVIOUS_TAG" ]; then
             CHANGES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s" --no-merges)
@@ -107,12 +195,18 @@ jobs:
             COMPARE=""
           fi
 
+          # Extract CHANGELOG.md section if available
+          CHANGELOG_SECTION=""
+          if [ -f "CHANGELOG.md" ]; then
+            CHANGELOG_SECTION=$(awk "/^## \[${LUA_VERSION}\]/{found=1; next} /^## \[/{if(found) exit} found{print}" CHANGELOG.md)
+          fi
+
           # Count stats
           LUA_FILES=$(find lua -name "*.lua" | wc -l | tr -d ' ')
           LANG_COUNT=$(find lua/langs -name "*.lua" ! -name "_template.lua" ! -name "init.lua" | wc -l | tr -d ' ')
           PLUGIN_DIRS=$(find lua/plugins -mindepth 2 -name "*.lua" ! -name "init.lua" | wc -l | tr -d ' ')
 
-          cat > /tmp/release-notes.md << EOF
+          cat > /tmp/release-notes.md << 'ENDOFNOTES'
           <div align="center">
 
           # <img src="https://neovim.io/logos/neovim-mark.svg" width="28" height="28" /> NvimEnterprise ${TAG}
@@ -135,10 +229,24 @@ jobs:
           | 🌐 **Platform** | macOS · Linux · Windows · WSL · BSD · Docker · SSH |
           | 🛡️ **Security** | Sandbox loading, path validation, zero telemetry |
           | ⚡ **Performance** | Startup < 50ms — fully lazy-loaded |
+          | 📋 **Versioning** | SemVer ${LUA_VERSION} — CHANGELOG + automated releases |
 
           ---
+          ENDOFNOTES
 
-          ## 📋 What's Changed
+          # Add CHANGELOG section if available
+          if [ -n "$CHANGELOG_SECTION" ]; then
+            echo "" >> /tmp/release-notes.md
+            echo "## 📋 What's Changed (from CHANGELOG)" >> /tmp/release-notes.md
+            echo "" >> /tmp/release-notes.md
+            echo "$CHANGELOG_SECTION" >> /tmp/release-notes.md
+            echo "" >> /tmp/release-notes.md
+            echo "---" >> /tmp/release-notes.md
+          fi
+
+          cat >> /tmp/release-notes.md << ENDOFNOTES
+
+          ## 📋 Commits
 
           ${CHANGES}
 
@@ -180,6 +288,7 @@ jobs:
           ## 🔗 Links
 
           - 📖 [Documentation](https://github.com/ca971/nvim-enterprise#readme)
+          - 📋 [CHANGELOG](https://github.com/ca971/nvim-enterprise/blob/main/CHANGELOG.md)
           - 🐛 [Report a Bug](https://github.com/ca971/nvim-enterprise/issues/new)
           - 💡 [Request a Feature](https://github.com/ca971/nvim-enterprise/issues/new)
           - 🤝 [Contributing Guide](https://github.com/ca971/nvim-enterprise/blob/main/CONTRIBUTING.md)
@@ -193,10 +302,17 @@ jobs:
           **Crafted with ❤️ by [ca971](https://github.com/ca971) — for dev teams and enterprise.**
 
           </div>
-          EOF
+          ENDOFNOTES
 
           # Remove leading spaces from heredoc
           sed -i 's/^          //' /tmp/release-notes.md
+
+          # Substitute variables
+          sed -i "s/\${TAG}/${TAG}/g" /tmp/release-notes.md
+          sed -i "s/\${LUA_VERSION}/${LUA_VERSION}/g" /tmp/release-notes.md
+          sed -i "s/\${LANG_COUNT}/${LANG_COUNT}/g" /tmp/release-notes.md
+          sed -i "s/\${PLUGIN_DIRS}/${PLUGIN_DIRS}/g" /tmp/release-notes.md
+          sed -i "s/\${LUA_FILES}/${LUA_FILES}/g" /tmp/release-notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

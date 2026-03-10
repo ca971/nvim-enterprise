@@ -15,17 +15,19 @@ designed for professional developers and team environments.
 [![Platform](https://img.shields.io/badge/Platform-macOS%20·%20Linux%20·%20Windows%20·%20BSD%20·%20WSL-E95420?style=for-the-badge&logo=linux&logoColor=white)](#-cross-platform-support)
 [![CI](https://img.shields.io/github/actions/workflow/status/ca971/nvim-enterprise/ci.yml?style=for-the-badge&label=CI&logo=githubactions&logoColor=white)](https://github.com/ca971/nvim-enterprise/actions)
 
+[![Release](https://img.shields.io/github/v/release/ca971/nvim-enterprise?style=flat-square&logo=semanticrelease&logoColor=white&label=Latest)](https://github.com/ca971/nvim-enterprise/releases/latest)
 [![Plugins](https://img.shields.io/badge/Plugins-35%2B-blue?style=flat-square&logo=hackthebox&logoColor=white)](#-plugin-ecosystem)
 [![Languages](https://img.shields.io/badge/Languages-45%2B-purple?style=flat-square&logo=treesitter&logoColor=white)](#-language-support)
 [![Startup](https://img.shields.io/badge/Startup-%3C%2050ms-ff6b6b?style=flat-square&logo=speedtest&logoColor=white)](#-performance-benchmarks)
 [![Maintained](https://img.shields.io/badge/Status-Active-success?style=flat-square)](https://github.com/ca971/nvim-enterprise)
+[![Changelog](https://img.shields.io/badge/Changelog-Keep%20a%20Changelog-E05735?style=flat-square)](./CHANGELOG.md)
 
 <br/>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/ca971nvim.png">
   <source media="(prefers-color-scheme: light)" srcset="assets/ca971nvim.png">
-  <img src="assets/commands.png" alt="Nvim Enterprise — Dashboard" width="850" style="border-radius: 12px; border: 2px solid #30363d;">
+  <img src="assets/ca971nvim.png" alt="Nvim Enterprise — Dashboard" width="850" style="border-radius: 12px; border: 2px solid #30363d;">
 </picture>
 
 <br/><br/>
@@ -35,6 +37,7 @@ designed for professional developers and team environments.
 [Commands](#%EF%B8%8F-enterprise-command-reference) •
 [Languages](#-language-support) •
 [AI](#-ai-integration) •
+[Versioning](#-versioning--releases) •
 [Wiki](https://github.com/ca971/nvim-enterprise/wiki)
 
 </div>
@@ -61,6 +64,7 @@ designed for professional developers and team environments.
 - [🗺️ Keymap Reference](#%EF%B8%8F-keymap-reference)
 - [🛡️ Security & Sandboxing](#%EF%B8%8F-security--sandboxing)
 - [⚡ Performance Benchmarks](#-performance-benchmarks)
+- [📋 Versioning & Releases](#-versioning--releases)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 
@@ -98,6 +102,7 @@ configurations across engineers, or a sysadmin managing shared server environmen
 │  ┌────────────────────────────▼───────────────────────────────┐  │
 │  │         Core Engine (OOP / Class System / Lua 5.4)         │  │
 │  │  bootstrap · class · settings · platform · security · log  │  │
+│  │  version (SemVer) · icons · health · utils                 │  │
 │  └────────────────────────────┬───────────────────────────────┘  │
 │                               │                                  │
 │  ┌────────────────────────────▼───────────────────────────────┐  │
@@ -118,6 +123,7 @@ configurations across engineers, or a sysadmin managing shared server environmen
 | 🧩 **Modular** | Atomic file structure — one language file, one plugin file, one concern |
 | 📈 **Scalable** | From a single laptop to fleet-wide deployment across teams and servers |
 | 🌐 **Portable** | Automatic OS/environment detection via `core/platform.lua` |
+| 📋 **Versioned** | SemVer tags, CHANGELOG, per-module `@version`, automated releases |
 
 ---
 
@@ -134,6 +140,7 @@ configurations across engineers, or a sysadmin managing shared server environmen
 - **Deep-merge engine** — user overrides cascade cleanly
 - **Bootstrap loader** (`core/bootstrap.lua`) — deterministic init sequence
 - Protected module loading with structured error handling
+- **SemVer versioning** with `core/version.lua` as single source of truth
 
 </td>
 <td width="50%" valign="top">
@@ -155,7 +162,7 @@ configurations across engineers, or a sysadmin managing shared server environmen
 
 - **9+ premium colorschemes** — Catppuccin, TokyoNight, Kanagawa…
 - Runtime theme switching via `config/colorscheme_manager.lua`
-- Powerline statusline (Lualine) with custom components
+- Powerline statusline (Lualine) with **contextual runtime detection**
 - Rich dashboard (Snacks.nvim) with quick actions
 - Noice.nvim + Dressing.nvim for premium UI overlays
 
@@ -321,10 +328,12 @@ nvim
 | :--- | :--- |
 | `:NvimInfo` | Detailed summary — OS, environment, active user, AI status, runtimes |
 | `:NvimVersion` | NvimEnterprise and Neovim version details |
+| `:Version` | Quick version display notification |
 | `:NvimHealth` | Comprehensive health check (`nvimenterprise/health.lua`) |
 | `:NvimPerf` | Startup time profiling and per-plugin load statistics |
 | `:NvimCommands` | Interactive floating Command Central HUD |
 | `:NvimEditConfig` | Quick-jump to configuration root in Neo-tree |
+| `:SystemInfo` | Platform detection details in floating window |
 
 </details>
 
@@ -360,6 +369,17 @@ nvim
 | :--- | :--- |
 | `:NvimGitProtocol` | View or switch Git protocol (SSH ↔ HTTPS) |
 | `:NvimGitConvert` | Bulk-convert plugin remotes to active protocol |
+
+</details>
+
+<details>
+<summary><strong>🔐 AI & Secrets</strong></summary>
+
+| Command | Description |
+| :--- | :--- |
+| `:AIStatus` | Show AI API keys status (masked) |
+| `:AISecrets` | Alias for `:AIStatus` |
+| `:AIReload` | Reload secrets from `.env` files and show status |
 
 </details>
 
@@ -437,6 +457,10 @@ return {
 ├── settings.lua                    # Global settings override (user-facing)
 ├── install.sh                      # One-line installer script
 ├── lazy-lock.json                  # Plugin version lockfile
+├── CHANGELOG.md                    # Release history (Keep a Changelog)
+│
+├── scripts/
+│   └── release.sh                  # Semi-automated SemVer release workflow
 │
 └── lua/
     ├── config/                     # ── Configuration layer ──────────────
@@ -453,6 +477,7 @@ return {
     │   ├── init.lua                #   Core module loader
     │   ├── bootstrap.lua           #   Deterministic init sequence
     │   ├── class.lua               #   OOP class system (inheritance, mixins)
+    │   ├── version.lua             #   SemVer — single source of truth
     │   ├── settings.lua            #   Default settings & schema
     │   ├── options.lua             #   Neovim option presets
     │   ├── keymaps.lua             #   Global keymap definitions
@@ -460,6 +485,7 @@ return {
     │   ├── icons.lua               #   Centralized icon/glyph registry
     │   ├── platform.lua            #   OS & environment detection
     │   ├── security.lua            #   Sandbox & path validation
+    │   ├── secrets.lua             #   Secure .env API key loader
     │   ├── logger.lua              #   Structured logging system
     │   ├── health.lua              #   Core health checks
     │   └── utils.lua               #   Shared utility functions
@@ -608,6 +634,82 @@ plugins = {
 
 ---
 
+## 📋 Versioning & Releases
+
+NvimEnterprise follows **[Semantic Versioning (SemVer)](https://semver.org/)** with a dual-level
+versioning strategy.
+
+### Version Levels
+
+| Level | Scope | Location | Example |
+| :--- | :--- | :--- | :--- |
+| **Project version** | Entire repository | `lua/core/version.lua` + Git tag | `v1.0.1` |
+| **Module version** | Individual file | `---@version` in file header | `@version 2.2.0` |
+
+### SemVer Rules
+
+```
+MAJOR.MINOR.PATCH[-pre]
+  │     │     │     └─ Pre-release: alpha, beta, rc.1
+  │     │     └─────── Patch: bug fix, refactor, docs, style
+  │     └───────────── Minor: new feature, module, command
+  └─────────────────── Major: breaking change, architecture shift
+```
+
+| Increment | When | Examples |
+| :--- | :--- | :--- |
+| `x.x.+1` PATCH | Fix, refactor, doc, typo | Fix lualine separator, add luadoc |
+| `x.+1.0` MINOR | New module, plugin, command | Add `core/snippets.lua`, `:AIReload` |
+| `+1.0.0` MAJOR | Breaking change | Refonte `core/settings` API |
+
+### Commit Convention
+
+```bash
+# Format: type(scope): description
+git commit -m "fix(lualine): separator glitch when no LSP"
+git commit -m "feat(platform): expose runtime executable resolver"
+git commit -m "docs(lualine): add elite luadoc annotations"
+git commit -m "chore(hooks): prefer luajit in pre-push"
+```
+
+| Type | SemVer | Usage |
+| :--- | :---: | :--- |
+| `fix` | PATCH | Bug fix |
+| `feat` | MINOR | New feature |
+| `refactor` | PATCH | Code restructuring, no behavior change |
+| `docs` | PATCH | Documentation only |
+| `chore` | PATCH | Tooling, hooks, CI |
+| `perf` | PATCH | Performance optimization |
+| `style` | PATCH | Formatting (stylua) |
+| `feat!` | MAJOR | Breaking change |
+
+### Release Workflow
+
+```bash
+# Semi-automated release
+./scripts/release.sh 1.0.1 "Lualine refactor + platform API"
+
+# Manual steps (if preferred)
+nvim lua/core/version.lua    # Update version numbers
+nvim CHANGELOG.md            # Document changes
+git add -A
+git commit -m "release: v1.0.1 — Lualine refactor"
+git tag -a v1.0.1 -m "v1.0.1 — Lualine refactor + platform API"
+git push origin main
+git push origin v1.0.1       # Triggers CI → GitHub Release
+```
+
+### Files
+
+| File | Purpose |
+| :--- | :--- |
+| `lua/core/version.lua` | Single source of truth (read by `:Version` command) |
+| `CHANGELOG.md` | Human-readable history ([Keep a Changelog](https://keepachangelog.com/)) |
+| `scripts/release.sh` | Automated version bump + tag + push |
+| `.github/workflows/ci.yml` | CI creates GitHub Release on `v*` tags |
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
@@ -638,9 +740,9 @@ or commercial purposes.
 
 <img src="https://neovim.io/logos/neovim-mark.svg" width="24" height="24" alt="Neovim" />
 
-**Crafted with ❤️ by [ca971](https://github.com/ca971) - Christian ACHILLE, for dev teams and enterprise.**
+**Crafted with ❤️ by [ca971](https://github.com/ca971) — Christian ACHILLE, for dev teams and enterprise.**
 
-[⬆ Back to Top](#-nvimenterprise)
+[⬆ Back to Top](#-nvim-enterprise)
 
 [![Release](https://img.shields.io/github/v/release/ca971/nvim-enterprise?style=social&logo=github)](https://github.com/ca971/nvim-enterprise/releases/latest)
 [![Stars](https://img.shields.io/github/stars/ca971/nvim-enterprise?style=social)](https://github.com/ca971/nvim-enterprise)
