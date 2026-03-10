@@ -3,7 +3,7 @@
 ---@module "init"
 ---@author ca971
 ---@license MIT
----@version 1.0.0
+---@version 1.1.1
 ---@since 2026-01
 ---
 ---@see core            Core bootstrap orchestrator (platform, settings, lazy, plugins)

@@ -3,7 +3,7 @@
 ---@module "core.version"
 ---@author ca971
 ---@license MIT
----@version 1.1.0
+---@version 1.1.1
 ---@since 2026-01
 ---
 ---@see https://semver.org SemVer specification
@@ -18,7 +18,7 @@
 local M = {
 	major = 1,
 	minor = 1,
-	patch = 0,
+	patch = 1,
 	pre = nil,
 }
 
