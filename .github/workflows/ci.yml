@@ -75,58 +75,6 @@ jobs:
             --no-unused
           echo "✅ Luacheck passed"
 
-  version:
-    name: Version Consistency
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install LuaJIT
-        run: sudo apt-get update && sudo apt-get install -y luajit
-
-      - name: Verify version.lua exists
-        run: |
-          if [ ! -f "lua/core/version.lua" ]; then
-            echo "❌ lua/core/version.lua not found"
-            exit 1
-          fi
-          echo "✅ version.lua exists"
-
-      - name: Verify tag matches version.lua (on tag push)
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          TAG="${GITHUB_REF#refs/tags/v}"
-          LUA_VERSION=$(luajit -e "
-            local v = dofile('lua/core/version.lua')
-            print(v.string())
-          " 2>/dev/null || echo "PARSE_ERROR")
-
-          if [ "$LUA_VERSION" = "PARSE_ERROR" ]; then
-            echo "❌ Failed to parse lua/core/version.lua"
-            exit 1
-          fi
-
-          if [ "$TAG" != "$LUA_VERSION" ]; then
-            echo "❌ Tag v${TAG} does not match version.lua (${LUA_VERSION})"
-            echo "   Update lua/core/version.lua before tagging"
-            exit 1
-          fi
-          echo "✅ Tag v${TAG} matches version.lua (${LUA_VERSION})"
-
-      - name: Verify CHANGELOG entry (on tag push)
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          TAG="${GITHUB_REF#refs/tags/v}"
-          if [ -f "CHANGELOG.md" ]; then
-            if grep -q "\[${TAG}\]" CHANGELOG.md; then
-              echo "✅ CHANGELOG.md contains [${TAG}]"
-            else
-              echo "⚠️  CHANGELOG.md missing [${TAG}] entry (warning only)"
-            fi
-          else
-            echo "⚠️  CHANGELOG.md not found (warning only)"
-          fi
-
   startup:
     name: Neovim Startup
     runs-on: ubuntu-latest
@@ -155,9 +103,64 @@ jobs:
           VERSION=$(timeout 30 nvim --headless -c "lua print(require('core.version').string())" -c "quitall" 2>&1 | tail -1)
           echo "✅ Version: ${VERSION}"
 
+  # =========================================================
+  # Conditional jobs - Only run on tag push
+  # =========================================================
+
+  version:
+    name: Version Consistency
+    if: startsWith(github.ref, 'refs/tags/v') # ← CHANGEMENT CLÉ
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LuaJIT
+        run: sudo apt-get update && sudo apt-get install -y luajit
+
+      - name: Verify version.lua exists
+        run: |
+          if [ ! -f "lua/core/version.lua" ]; then
+            echo "❌ lua/core/version.lua not found"
+            exit 1
+          fi
+          echo "✅ version.lua exists"
+
+      - name: Verify tag matches version.lua
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          LUA_VERSION=$(luajit -e "
+            local v = dofile('lua/core/version.lua')
+            print(v.string())
+          " 2>/dev/null || echo "PARSE_ERROR")
+
+          if [ "$LUA_VERSION" = "PARSE_ERROR" ]; then
+            echo "❌ Failed to parse lua/core/version.lua"
+            exit 1
+          fi
+
+          if [ "$TAG" != "$LUA_VERSION" ]; then
+            echo "❌ Tag v${TAG} does not match version.lua (${LUA_VERSION})"
+            echo "   Update lua/core/version.lua before tagging"
+            exit 1
+          fi
+          echo "✅ Tag v${TAG} matches version.lua (${LUA_VERSION})"
+
+      - name: Verify CHANGELOG entry
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          if [ -f "CHANGELOG.md" ]; then
+            if grep -q "\[${TAG}\]" CHANGELOG.md; then
+              echo "✅ CHANGELOG.md contains [${TAG}]"
+            else
+              echo "⚠️  CHANGELOG.md missing [${TAG}] entry (warning only)"
+            fi
+          else
+            echo "⚠️  CHANGELOG.md not found (warning only)"
+          fi
+
   release:
     name: Create Release
-    needs: [lint, syntax, version, startup]
+    needs: [lint, syntax, startup, version]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -180,13 +183,11 @@ jobs:
           TAG="${{ steps.version.outputs.tag }}"
           PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -v "^${TAG}$" | head -1)
 
-          # Extract version from version.lua
           LUA_VERSION=$(luajit -e "
             local v = dofile('lua/core/version.lua')
             print(v.string())
           " 2>/dev/null || echo "${TAG#v}")
 
-          # Build changelog from commits
           if [ -n "$PREVIOUS_TAG" ]; then
             CHANGES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s" --no-merges)
             COMPARE="**Full Changelog**: https://github.com/ca971/nvim-enterprise/compare/${PREVIOUS_TAG}...${TAG}"
@@ -195,13 +196,11 @@ jobs:
             COMPARE=""
           fi
 
-          # Extract CHANGELOG.md section if available
           CHANGELOG_SECTION=""
           if [ -f "CHANGELOG.md" ]; then
             CHANGELOG_SECTION=$(awk "/^## \[${LUA_VERSION}\]/{found=1; next} /^## \[/{if(found) exit} found{print}" CHANGELOG.md)
           fi
 
-          # Count stats
           LUA_FILES=$(find lua -name "*.lua" | wc -l | tr -d ' ')
           LANG_COUNT=$(find lua/langs -name "*.lua" ! -name "_template.lua" ! -name "init.lua" | wc -l | tr -d ' ')
           PLUGIN_DIRS=$(find lua/plugins -mindepth 2 -name "*.lua" ! -name "init.lua" | wc -l | tr -d ' ')
@@ -234,7 +233,6 @@ jobs:
           ---
           ENDOFNOTES
 
-          # Add CHANGELOG section if available
           if [ -n "$CHANGELOG_SECTION" ]; then
             echo "" >> /tmp/release-notes.md
             echo "## 📋 What's Changed (from CHANGELOG)" >> /tmp/release-notes.md
@@ -285,7 +283,7 @@ jobs:
 
           ---
 
-          ## 🔗 Links
+          ## ��� Links
 
           - 📖 [Documentation](https://github.com/ca971/nvim-enterprise#readme)
           - 📋 [CHANGELOG](https://github.com/ca971/nvim-enterprise/blob/main/CHANGELOG.md)
@@ -304,10 +302,8 @@ jobs:
           </div>
           ENDOFNOTES
 
-          # Remove leading spaces from heredoc
           sed -i 's/^          //' /tmp/release-notes.md
 
-          # Substitute variables
           sed -i "s/\${TAG}/${TAG}/g" /tmp/release-notes.md
           sed -i "s/\${LUA_VERSION}/${LUA_VERSION}/g" /tmp/release-notes.md
           sed -i "s/\${LANG_COUNT}/${LANG_COUNT}/g" /tmp/release-notes.md
