@@ -3,7 +3,7 @@
 ---@module "core.version"
 ---@author ca971
 ---@license MIT
----@version 1.0.1
+---@version 1.1.0
 ---@since 2026-01
 ---
 ---@see https://semver.org SemVer specification
@@ -23,13 +23,7 @@ local M = {
 }
 
 --- Return full semver string.
----
---- ```lua
---- require("core.version").string()  -- → "1.0.1"
---- -- With pre-release:              -- → "2.0.0-beta"
---- ```
----
----@return string version Formatted semver string
+---@return string version e.g. "1.1.0" or "2.0.0-beta"
 ---@nodiscard
 function M.string()
 	local v = string.format("%d.%d.%d", M.major, M.minor, M.patch)
@@ -48,21 +42,15 @@ function M.show()
 end
 
 --- Compare with a required minimum version.
----
---- ```lua
---- require("core.version").at_least(1, 0, 0)  -- → true
---- require("core.version").at_least(2, 0, 0)  -- → false
---- ```
----
----@param major integer Required major version
----@param minor integer Required minor version
----@param patch integer Required patch version
----@return boolean meets `true` if current version ≥ required
+---@param maj integer Required major version
+---@param min integer Required minor version
+---@param pat integer Required patch version
+---@return boolean meets `true` if current version >= required
 ---@nodiscard
-function M.at_least(major, minor, patch)
-	if M.major ~= major then return M.major > major end
-	if M.minor ~= minor then return M.minor > minor end
-	return M.patch >= patch
+function M.at_least(maj, min, pat)
+	if M.major ~= maj then return M.major > maj end
+	if M.minor ~= min then return M.minor > min end
+	return M.patch >= pat
 end
 
 vim.api.nvim_create_user_command("Version", function()

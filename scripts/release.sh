@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔══════════════════════════════════════════════════════════╗
 # ║  scripts/release.sh — Semi-automated SemVer release      ║
-# ║  Usage: ./scripts/release.sh 1.0.1 "Short description"   ║
+# ║  Usage: ./scripts/release.sh 1.1.0 "Short description"   ║
 # ╚══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
@@ -19,6 +19,13 @@ NC='\033[0m'
 echo -e "${CYAN}╔══════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║  NvimEnterprise Release — ${TAG}          ${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════╝${NC}"
+
+# ── macOS/Linux sed compatibility ──────────────────────────
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed_i() { sed -i '' "$@"; }
+else
+    sed_i() { sed -i "$@"; }
+fi
 
 # ── Guards ─────────────────────────────────────────────────
 if ! git diff --quiet || ! git diff --cached --quiet; then
@@ -46,22 +53,21 @@ fi
 # ── Update lua/core/version.lua ────────────────────────────
 VERSION_FILE="lua/core/version.lua"
 if [ -f "$VERSION_FILE" ]; then
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        SED_INPLACE=(sed -i '')
-    else
-        SED_INPLACE=(sed -i)
-    fi
+    # Only match lines starting with TAB + field name (inside local M = {})
+    sed_i '/^	major = /s/[0-9][0-9]*/'"$MAJOR"'/' "$VERSION_FILE"
+    sed_i '/^	minor = /s/[0-9][0-9]*/'"$MINOR"'/' "$VERSION_FILE"
+    sed_i '/^	patch = /s/[0-9][0-9]*/'"$PATCH"'/' "$VERSION_FILE"
 
-    "${SED_INPLACE[@]}" "s/major = [0-9]*/major = $MAJOR/" "$VERSION_FILE"
-    "${SED_INPLACE[@]}" "s/minor = [0-9]*/minor = $MINOR/" "$VERSION_FILE"
-    "${SED_INPLACE[@]}" "s/patch = [0-9]*/patch = $PATCH/" "$VERSION_FILE"
-
+    # Update pre — only the line starting with TAB + "pre"
     if [ -n "$PRE" ]; then
-        sed -i.bak "s/pre.*=.*/pre   = \"$PRE\",/" "$VERSION_FILE"
+        sed_i '/^	pre/s/.*/	pre = "'"$PRE"'",/' "$VERSION_FILE"
     else
-        sed -i.bak "s/pre.*=.*/pre   = nil,/" "$VERSION_FILE"
+        sed_i '/^	pre/s/.*/	pre = nil,/' "$VERSION_FILE"
     fi
-    rm -f "${VERSION_FILE}.bak"
+
+    # Update @version in luadoc header
+    sed_i 's/^---@version .*/---@version '"${VERSION}"'/' "$VERSION_FILE"
+
     echo -e "${GREEN}✓ Updated ${VERSION_FILE} → ${VERSION}${NC}"
 else
     echo -e "${YELLOW}⚠ ${VERSION_FILE} not found — skipping${NC}"
