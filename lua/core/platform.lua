@@ -3,7 +3,7 @@
 ---@module "core.platform"
 ---@author ca971
 ---@license MIT
----@version 1.0.0
+---@version 1.0.1
 ---@since 2026-01
 ---
 ---@see core.class Base OOP system (Platform extends Class)
@@ -121,7 +121,7 @@ local RUNTIME_EXECUTABLES = {
 	java = "java",
 	julia = "julia",
 	lean = "lean",
-	lua = "lua",
+	lua = { "luajit", "lua" },
 	mysql = "mysql",
 	nix = "nix",
 	node = "node",
@@ -138,6 +138,36 @@ local RUNTIME_EXECUTABLES = {
 	zig = "zig",
 	dart = "dart",
 }
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- EXPOSE REGISTRY
+--
+-- Registry as property of Platform Class
+-- ═══════════════════════════════════════════════════════════════════════
+Platform.RUNTIME_EXECUTABLES = RUNTIME_EXECUTABLES
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- RESOLVE EXECUTABLE RUNTIME
+--
+-- Method to resolve executable runtime
+-- ═══════════════════════════════════════════════════════════════════════
+--- Resolve the first available executable for a named runtime.
+---
+--- Uses the RUNTIME_EXECUTABLES registry. For entries with multiple
+--- candidates (e.g. python → {"python3", "python"}), returns the
+--- first one found in PATH.
+---
+---@param name string Runtime key (e.g. "lua", "python", "node")
+---@return string|nil executable The resolved executable name, or nil
+function Platform:get_runtime_executable(name)
+	local exes = RUNTIME_EXECUTABLES[name]
+	if not exes then return nil end
+	if type(exes) == "string" then return self:has_executable(exes) and exes or nil end
+	for _, exe in ipairs(exes) do
+		if self:has_executable(exe) then return exe end
+	end
+	return nil
+end
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- STDPATH REGISTRY
