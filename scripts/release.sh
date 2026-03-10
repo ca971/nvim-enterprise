@@ -73,6 +73,13 @@ else
     echo -e "${YELLOW}⚠ ${VERSION_FILE} not found — skipping${NC}"
 fi
 
+# Update @version in init.lua header
+INIT_FILE="init.lua"
+if [ -f "$INIT_FILE" ]; then
+    sed_i 's/^---@version .*/---@version '"${VERSION}"'/' "$INIT_FILE"
+    echo -e "${GREEN}✓ Updated ${INIT_FILE} @version → ${VERSION}${NC}"
+fi
+
 # ── Verify CHANGELOG.md ───────────────────────────────────
 CHANGELOG="CHANGELOG.md"
 if [ -f "$CHANGELOG" ]; then

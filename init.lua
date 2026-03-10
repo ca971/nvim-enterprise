@@ -158,22 +158,25 @@ local config_dir = stdpath("config") --[[@as string]]
 -- ═══════════════════════════════════════════════════════════════════════════
 -- PHASE 4 — LOAD VERSION
 --
--- Zero-cost version extraction from settings.lua. Uses dofile() which
--- is faster than require() for data-only files (no module caching needed
--- at this stage — core.settings will handle the full load later).
--- Uses uv.fs_stat() instead of vim.fn.filereadable() to avoid crossing
--- the vimscript boundary.
+-- Single source of truth: lua/core/version.lua
+-- Uses dofile() for zero-overhead loading before require() is warm.
+-- No dependency on vim.* — version.lua is pure Lua data + functions.
 -- ═══════════════════════════════════════════════════════════════════════════
 
 ---@type string SemVer configuration version (fallback: "0.0.0")
 local config_version = "0.0.0"
 
 do
-	local settings_path = config_dir .. "/settings.lua"
+	local version_path = config_dir .. "/lua/core/version.lua"
 
-	if uv.fs_stat(settings_path) then
-		local ok, data = pcall(dofile, settings_path)
-		if ok and type(data) == "table" and data.version then config_version = data.version end
+	if uv.fs_stat(version_path) then
+		-- version.lua uses vim.* only in show() and command registration.
+		-- At this stage vim.api is available, so dofile() is safe.
+		local ok, version_mod = pcall(dofile, version_path)
+		if ok and type(version_mod) == "table" and version_mod.string then
+			local sok, ver = pcall(version_mod.string, version_mod)
+			if sok and type(ver) == "string" then config_version = ver end
+		end
 	end
 end
 
@@ -181,16 +184,11 @@ end
 -- PHASE 5 — GLOBAL NAMESPACE
 --
 -- Minimal global namespace populated lazily by core modules.
--- Only the version is set eagerly; settings, platform, and state
--- are filled during core bootstrap (Phase 7).
---
--- This table is the single source of truth for runtime state
--- across the entire configuration. Plugins and user code should
--- read from _G.NvimConfig rather than re-requiring core modules.
+-- Version comes from core/version.lua (single source of truth).
 -- ═══════════════════════════════════════════════════════════════════════════
 
 ---@class NvimConfig
----@field version string  Configuration version (SemVer, from settings.lua)
+---@field version string  Configuration version (from core/version.lua)
 ---@field settings table  Merged settings (populated by core.settings:load)
 ---@field platform table  Platform information (populated by core.platform:detect)
 ---@field state NvimConfigState Runtime state flags

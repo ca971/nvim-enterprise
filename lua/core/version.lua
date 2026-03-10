@@ -53,8 +53,24 @@ function M.at_least(maj, min, pat)
 	return M.patch >= pat
 end
 
-vim.api.nvim_create_user_command("Version", function()
-	M.show()
-end, { desc = "Show nvim-enterprise version" })
+--- Register user commands (called once, idempotent).
+---@return nil
+function M.setup_commands()
+	if M._commands_registered then return end
+	M._commands_registered = true
+
+	vim.api.nvim_create_user_command("Version", function()
+		M.show()
+	end, { desc = "Show nvim-enterprise version" })
+
+	vim.api.nvim_create_user_command("NvimVersion", function()
+		M.show()
+	end, { desc = "Show nvim-enterprise version" })
+end
+
+-- Auto-register commands when loaded via require() (vim.* is available)
+-- When loaded via dofile() from init.lua, commands are registered
+-- later during core bootstrap.
+if vim and vim.api then M.setup_commands() end
 
 return M
