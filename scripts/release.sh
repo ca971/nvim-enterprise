@@ -3,7 +3,7 @@
 # ║  scripts/release.sh — Semi-automated SemVer release      ║
 # ║  Usage: ./scripts/release.sh 1.1.0 "Short description"   ║
 # ╚══════════════════════════════════════════════════════════╝
-
+#
 set -euo pipefail
 
 VERSION="${1:?Usage: release.sh VERSION \"message\"}"
