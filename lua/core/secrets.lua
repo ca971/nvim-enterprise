@@ -255,12 +255,12 @@ function M.load_dotenv(path, opts)
 	local count = 0
 	local override = opts.override
 
-	for line in data:gmatch("[^\r\n]+") do
+	for raw_line in data:gmatch("[^\r\n]+") do
 		-- Fast skip: comment or empty (byte-level check, no pattern)
-		local first = line:byte(1)
+		local first = raw_line:byte(1)
 		if first and first ~= 35 then -- 35 = '#'
 			-- Trim leading/trailing whitespace
-			line = line:match("^%s*(.-)%s*$")
+			local line = raw_line:match("^%s*(.-)%s*$")
 
 			if line ~= "" and line:byte(1) ~= 35 then
 				local key, value = line:match("^([%w_]+)%s*=%s*(.+)$")
