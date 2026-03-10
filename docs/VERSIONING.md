@@ -2,24 +2,24 @@
 
 ## Semantic Versioning (SemVer)
 
-NvimEnterprise suit [SemVer 2.0.0](https://semver.org/) avec deux niveaux de version.
+NvimEnterprise follows [SemVer 2.0.0](https://semver.org/) with two distinct versioning levels.
 
 ```
 MAJOR.MINOR.PATCH[-pre]
-  │     │     │     └─ Pre-release : alpha, beta, rc.1
-  │     │     └─────── Patch : fix, refactor, docs, style
-  │     └───────────── Minor : nouvelle feature, module, commande
-  └─────────────────── Major : breaking change, refonte architecture
+  │     │     │      └─ Pre-release: alpha, beta, rc.1
+  │     │     └──────── Patch: fix, refactor, docs, style
+  │     └────────────── Minor: new feature, module, command
+  └──────────────────── Major: breaking change, architectural overhaul
 ```
 
-## Deux niveaux de version
+## Two Versioning Levels
 
-| Niveau | Scope | Localisation | Exemple |
-|---|---|---|---|
-| **Projet** | Tout le dépôt | `lua/core/version.lua` + tag Git | `v1.1.0` |
-| **Module** | Fichier individuel | `---@version` dans le header | `@version 2.2.0` |
+| Level | Scope | Location | Example |
+| --- | --- | --- | --- |
+| **Project** | Entire repository | `lua/core/version.lua` + Git tag | `v1.1.0` |
+| **Module** | Individual file | `---@version` in the header | `@version 2.2.0` |
 
-### Source unique : `lua/core/version.lua`
+### Single Source of Truth: `lua/core/version.lua`
 
 ```lua
 local M = {
@@ -30,40 +30,41 @@ local M = {
 }
 ```
 
-Tous les autres fichiers **lisent** depuis cette source :
-- `init.lua` → `dofile("lua/core/version.lua")`
-- `:Version` → `require("core.version").show()`
-- `release.sh` → met à jour via `sed`
-- CI → parse via `grep`
+All other files **read** from this source:
 
-### Version par module (indépendante)
+* `init.lua` → `dofile("lua/core/version.lua")`
+* `:Version` command → `require("core.version").show()`
+* `release.sh` → Updates via `sed`
+* CI → Parses via `grep`
+
+### Per-Module Version (Independent)
 
 ```lua
 -- lua/plugins/ui/lualine.lua
----@version 2.2.0  ← version du MODULE, pas du projet
+---@version 2.2.0  ← MODULE version, distinct from project version
 ```
 
-Un module peut être en `v3.0.0` alors que le projet est en `v1.2.0`.
+A module can be at `v3.0.0` while the project itself is at `v1.2.0`.
 
-## Fichiers impliqués
+## Involved Files
 
-| Fichier | Rôle |
-|---|---|
-| `lua/core/version.lua` | Source unique (major, minor, patch) |
-| `init.lua` | `@version` dans le header LuaDoc |
-| `CHANGELOG.md` | Historique humain |
-| `scripts/release.sh` | Met à jour version.lua + init.lua |
-| `.github/workflows/ci.yml` | Vérifie tag = version.lua |
+| File | Role |
+| --- | --- |
+| `lua/core/version.lua` | Single Source of Truth (major, minor, patch) |
+| `init.lua` | `@version` in the LuaDoc header |
+| `CHANGELOG.md` | Human-readable history |
+| `scripts/release.sh` | Updates version.lua + init.lua |
+| `.github/workflows/ci.yml` | Verifies Git tag matches version.lua |
 
-## Diagramme
+## Architecture Flow
 
 ```
-lua/core/version.lua  (source unique)
+lua/core/version.lua  (Single Source of Truth)
         │
-        ├──→ init.lua           dofile() → _G.NvimConfig.version
-        ├──→ :Version           commande utilisateur
-        ├──→ :NvimVersion       alias
-        ├──→ release.sh         mise à jour via sed
-        ├──→ CI                 parse via grep
-        └──→ CHANGELOG.md       référence humaine
+        ├──→ init.lua            dofile() → _G.NvimConfig.version
+        ├──→ :Version            User command
+        ├──→ :NvimVersion        Alias
+        ├──→ release.sh          Updated via sed
+        ├──→ CI                  Parsed via grep
+        └──→ CHANGELOG.md        Human reference
 ```
