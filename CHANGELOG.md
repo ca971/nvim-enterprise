@@ -10,6 +10,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - …
 
+## [1.1.1] - 2026-03-10
+
+### Changed
+- **versioning**: `core/version.lua` is now the single source of truth
+- **init.lua**: reads version from `core/version.lua` via `dofile()` (was `settings.lua`)
+- **settings.lua**: removed `version` field (was duplicated)
+- **version.lua**: command registration deferred via `setup_commands()` guard
+
+### Removed
+- **settings.lua**: `version = "1.0.0"` field (duplicated source of truth)
 ## [1.1.0] - 2026-03-10
 
 ### Changed
@@ -54,6 +64,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Security**: Sandbox loading, path validation, .env secrets with permission checks
 - **CI**: GitHub Actions — lint, syntax check, startup test, auto-release
 
-[Unreleased]: https://github.com/ca971/nvim-enterprise/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/ca971/nvim-enterprise/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/ca971/nvim-enterprise/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/ca971/nvim-enterprise/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/ca971/nvim-enterprise/releases/tag/v1.0.0
