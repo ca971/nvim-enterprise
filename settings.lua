@@ -313,7 +313,7 @@ return {
 		},
 
 		---@type boolean Show vertical cursor column
-		cursor_column = true,
+		cursor_column = false,
 		---@type integer CursorHold event delay (ms)
 		update_time = 200,
 		---@type integer Mapped sequence timeout (ms)
