@@ -3,7 +3,7 @@
 ---@module "langs.markdown"
 ---@author ca971
 ---@license MIT
----@version 1.0.0
+---@version 1.1.0
 ---@since 2026-01
 ---
 ---@see core.settings            Language enable/disable guard (`is_language_enabled`)
@@ -920,6 +920,70 @@ do
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
+-- RUNTIME SETUP — FILETYPE, BUFFER OPTIONS
+--
+-- Runs at MODULE IMPORT TIME. Decoupled from any plugin lifecycle.
+-- Guarantees filetype detection and buffer options are active
+-- regardless of which plugins are loaded or their load order.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- ── 1. Filetype detection ────────────────────────────────────────────────
+vim.filetype.add({
+	extension = {
+		md = "markdown",
+		mdx = "markdown.mdx",
+		rmd = "rmd",
+	},
+	filename = {
+		["README"] = "markdown",
+		["CHANGELOG"] = "markdown",
+		["LICENSE"] = "markdown",
+	},
+	pattern = {
+		["%.marksman%.toml$"] = "toml",
+		["%.markdownlint.*"] = "json",
+	},
+})
+
+-- ── 2. Buffer-local options for prose filetypes ──────────────────────────
+local prose_augroup = vim.api.nvim_create_augroup("MarkdownProseOpts", { clear = true })
+
+vim.api.nvim_create_autocmd("FileType", {
+	group = prose_augroup,
+	pattern = {
+		"markdown",
+		"markdown.mdx",
+		"text",
+		"plaintex",
+		"rst",
+		"org",
+		"norg",
+		"gitcommit",
+		"mail",
+	},
+	callback = function()
+		local opt = vim.opt_local
+		opt.wrap = true
+		opt.conceallevel = 2
+		opt.linebreak = true
+		opt.breakindent = true
+		opt.breakindentopt = "shift:2"
+		opt.textwidth = 80
+		opt.colorcolumn = "80"
+		opt.tabstop = 2
+		opt.shiftwidth = 2
+		opt.softtabstop = 2
+		opt.expandtab = true
+		opt.formatoptions = "tcroqnlj"
+		opt.commentstring = "<!-- %s -->"
+		opt.number = true
+		opt.relativenumber = false
+		opt.spell = true
+		opt.spelllang = "en_us"
+	end,
+})
+
+-- ═══════════════════════════════════════════════════════════════════════════
 -- LAZY.NVIM PLUGIN SPECS
 --
 -- All specs are returned as a list and merged by lazy.nvim with the
@@ -946,17 +1010,13 @@ end
 -- │ toggle-checkbox.nvim       │ ft = "markdown" (true lazy load)    │
 -- │ follow-md-links.nvim       │ ft = "markdown" (true lazy load)    │
 -- └────────────────────────────┴──────────────────────────────────────┘
---
--- NOTE: Markdown has the richest plugin ecosystem of any language in
--- this config. All plugins are ft-gated so non-Markdown sessions
--- pay zero startup cost.
 -- ═══════════════════════════════════════════════════════════════════════════
 
----@return LazyPluginSpec[] specs Lazy.nvim plugin specifications for Markdown
+---@return LazyPluginSpec[]
 return {
 	-- ── LSP SERVER ─────────────────────────────────────────────────────────
-	-- marksman: Markdown LSP for cross-file references, wiki-links,
-	-- heading completion, and document symbols. Lightweight and fast.
+	-- marksman: cross-file references, wiki-links, heading completion.
+	-- Filetype detection and buffer options are at module level above.
 	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"neovim/nvim-lspconfig",
@@ -965,92 +1025,36 @@ return {
 				marksman = {},
 			},
 		},
-		init = function()
-			-- ── Filetype detection ───────────────────────────────────
-			vim.filetype.add({
-				extension = {
-					md = "markdown",
-					mdx = "markdown.mdx",
-					rmd = "rmd",
-				},
-				filename = {
-					["README"] = "markdown",
-					["CHANGELOG"] = "markdown",
-					["LICENSE"] = "markdown",
-				},
-				pattern = {
-					["%.marksman%.toml$"] = "toml",
-					["%.markdownlint.*"] = "json",
-				},
-			})
-
-			-- ── Buffer-local options for prose filetypes ─────────────
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = {
-					"markdown",
-					"markdown.mdx",
-					"text",
-					"plaintex",
-					"rst",
-					"org",
-					"norg",
-					"gitcommit",
-					"mail",
-				},
-				callback = function()
-					local opt = vim.opt_local
-					opt.wrap = true
-					opt.conceallevel = 2
-					opt.linebreak = true
-					opt.breakindent = true
-					opt.breakindentopt = "shift:2"
-					opt.textwidth = 80
-					opt.colorcolumn = "80"
-					opt.tabstop = 2
-					opt.shiftwidth = 2
-					opt.softtabstop = 2
-					opt.expandtab = true
-					opt.formatoptions = "tcroqnlj"
-					opt.commentstring = "<!-- %s -->"
-					opt.number = true
-					opt.relativenumber = false
-					opt.spell = true
-					opt.spelllang = "en_us"
-				end,
-			})
-		end,
 	},
 
 	-- ── MASON TOOLS ────────────────────────────────────────────────────────
-	-- Ensures Markdown tooling is installed via Mason:
-	--   • prettier       — prose-aware code formatter
-	--   • markdownlint   — Markdown style and syntax linter
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"williamboman/mason.nvim",
 		opts = {
 			ensure_installed = {
 				"prettier",
-				"markdownlint",
+				"markdownlint-cli2",
 			},
 		},
 	},
 
 	-- ── FORMATTER ──────────────────────────────────────────────────────────
-	-- prettier: prose-wrap at 80 chars, 2-space indent.
-	-- markdownlint-cli2: auto-fixes lintable issues (trailing spaces, etc.)
-	-- markdown-toc: auto-generates/updates TOC markers.
+	-- prettier:           prose-wrap at 80 chars, 2-space indent
+	-- markdownlint-cli2:  auto-fixes lintable issues
+	-- markdown-toc:       auto-generates/updates TOC markers
+	--
+	-- FIX: removed `optional = true` (can prevent merge)
+	-- FIX: formatter config targets `prettier` (was `prettierd` — bug)
 	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"stevearc/conform.nvim",
-		optional = true,
 		opts = {
 			formatters_by_ft = {
 				["markdown"] = { "prettier", "markdownlint-cli2", "markdown-toc" },
 				["markdown.mdx"] = { "prettier", "markdownlint-cli2", "markdown-toc" },
 			},
 			formatters = {
-				prettierd = {
+				prettier = {
 					prepend_args = {
 						"--prose-wrap",
 						"always",
@@ -1065,33 +1069,18 @@ return {
 	},
 
 	-- ── LINTER ─────────────────────────────────────────────────────────────
-	-- markdownlint-cli2: checks Markdown files against style rules.
-	-- Respects project-local config (.markdownlint.json / .yaml).
+	-- FIX: removed `optional = true`
 	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"mfussenegger/nvim-lint",
-		optional = true,
 		opts = {
 			linters_by_ft = {
 				markdown = { "markdownlint-cli2" },
-			},
-			linters = {
-				["markdownlint-cli2"] = {
-					args = {},
-				},
 			},
 		},
 	},
 
 	-- ── TREESITTER PARSERS ─────────────────────────────────────────────────
-	-- markdown:         block-level syntax (headings, lists, code blocks)
-	-- markdown_inline:  inline syntax (bold, italic, links, code)
-	-- html:             embedded HTML in Markdown
-	-- latex:            math blocks ($…$ and $$…$$)
-	-- yaml:             YAML frontmatter (---…---)
-	-- toml:             TOML frontmatter (Hugo, etc.)
-	-- mermaid:          Mermaid diagrams in fenced code blocks
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"nvim-treesitter/nvim-treesitter",
 		opts = {
@@ -1108,12 +1097,6 @@ return {
 	},
 
 	-- ── OBSIDIAN ───────────────────────────────────────────────────────────
-	-- Vault management: wiki-links, backlinks, daily notes, search,
-	-- templates, tags, and checkbox toggling.
-	--
-	-- Conditionally loaded: only when CWD contains .obsidian/ directory.
-	-- Zero cost outside of Obsidian vaults.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"epwalsh/obsidian.nvim",
 		version = "*",
@@ -1182,10 +1165,6 @@ return {
 	},
 
 	-- ── RENDER MARKDOWN ────────────────────────────────────────────────────
-	-- Rich inline preview: headings with icons, code block borders,
-	-- styled checkboxes, link icons, table rendering, and more.
-	-- Anti-conceal shows raw markdown when cursor is on a line.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"MeanderingProgrammer/render-markdown.nvim",
 		ft = { "markdown", "norg", "rmd", "org", "codecompanion", "Avante" },
@@ -1267,9 +1246,6 @@ return {
 	},
 
 	-- ── MARKDOWN PREVIEW ───────────────────────────────────────────────────
-	-- Live browser preview with hot-reload. Opens a local web server
-	-- and synchronizes scroll position with the editor.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"iamcco/markdown-preview.nvim",
 		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
@@ -1303,9 +1279,6 @@ return {
 	},
 
 	-- ── IMG-CLIP ───────────────────────────────────────────────────────────
-	-- Paste images from system clipboard into markdown files.
-	-- Saves to assets/images/ with timestamp filenames.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"HakonHarnes/img-clip.nvim",
 		ft = { "markdown", "norg", "org" },
@@ -1328,9 +1301,6 @@ return {
 	},
 
 	-- ── VIM-TABLE-MODE ─────────────────────────────────────────────────────
-	-- Easy table creation and editing. Auto-aligns columns as you type,
-	-- manages separators, and supports Tableize for CSV-like data.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"dhruvasagar/vim-table-mode",
 		ft = { "markdown" },
@@ -1342,9 +1312,6 @@ return {
 	},
 
 	-- ── HEADLINES ──────────────────────────────────────────────────────────
-	-- Highlighted heading backgrounds and horizontal rule rendering.
-	-- Catppuccin-themed colors for h1–h6 with fat headline bars.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"lukas-reineke/headlines.nvim",
 		ft = { "markdown", "norg", "rmd", "org" },
@@ -1378,7 +1345,6 @@ return {
 			},
 		},
 		config = function(_, opts)
-			-- ── Catppuccin-themed headline highlight groups ──────────
 			vim.api.nvim_set_hl(0, "Headline1", { fg = "#f38ba8", bg = "#2a1f2e", bold = true })
 			vim.api.nvim_set_hl(0, "Headline2", { fg = "#fab387", bg = "#2a2520", bold = true })
 			vim.api.nvim_set_hl(0, "Headline3", { fg = "#f9e2af", bg = "#2a2820", bold = true })
@@ -1393,8 +1359,6 @@ return {
 	},
 
 	-- ── MARKDOWN-TOC ───────────────────────────────────────────────────────
-	-- Auto-generate and refresh table of contents with `:TOC`.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"richardbizik/nvim-toc",
 		ft = { "markdown" },
@@ -1404,31 +1368,18 @@ return {
 	},
 
 	-- ── TOGGLE CHECKBOX ────────────────────────────────────────────────────
-	-- Toggle markdown checkboxes with a single keymap.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"opdavies/toggle-checkbox.nvim",
 		ft = { "markdown" },
 	},
 
 	-- ── FOLLOW-MD-LINKS ────────────────────────────────────────────────────
-	-- Follow markdown links with `gf` — resolves both wiki-links
-	-- and standard markdown links to files and headings.
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"jghauser/follow-md-links.nvim",
 		ft = { "markdown" },
 	},
 
 	-- ── MKDNFLOW ───────────────────────────────────────────────────────────
-	-- Comprehensive markdown navigation and editing:
-	--   • Link creation, following, and destruction
-	--   • Heading navigation (]] / [[)
-	--   • Todo toggling with parent updates
-	--   • Table navigation and editing (Tab / S-Tab in insert mode)
-	--   • List management (auto-continue, numbering)
-	--   • Section folding
-	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"jakewvincent/mkdnflow.nvim",
 		ft = { "markdown" },
@@ -1447,7 +1398,11 @@ return {
 				tables = true,
 				yaml = false,
 			},
-			filetypes = { md = true, rmd = true, mdx = true },
+
+			-- FIX: use Neovim filetype names (not extensions)
+			-- OLD: { md = true, rmd = true, mdx = true }
+			filetypes = { "markdown", "rmd", "markdown.mdx" },
+
 			create_dirs = true,
 			perspective = {
 				priority = "current",
@@ -1467,24 +1422,33 @@ return {
 					return text:gsub(" ", "-"):lower()
 				end,
 			},
+
+			-- FIX: flatten placeholders (remove before/after nesting)
+			-- OLD: placeholders = { before = { title = ..., date = ... }, after = {} }
 			new_file_template = {
 				use_template = true,
 				placeholders = {
-					before = {
-						title = "link_title",
-						date = "os_date",
-					},
-					after = {},
+					title = "link_title",
+					date = "os_date",
 				},
 				template = "# {{ title }}\n\nDate: {{ date }}\n\n",
 			},
+
+			-- FIX: complete rewrite of to_do section
+			-- OLD: symbols, not_started, in_progress, complete, update_parents
+			-- NEW: statuses (dict), status_order, status_propagation
 			to_do = {
-				symbols = { " ", "-", "x" },
-				update_parents = true,
-				not_started = " ",
-				in_progress = "-",
-				complete = "x",
+				statuses = {
+					[" "] = { name = "not_started" },
+					["-"] = { name = "in_progress" },
+					["x"] = { name = "complete" },
+				},
+				status_order = { " ", "-", "x" },
+				status_propagation = {
+					up = true,
+				},
 			},
+
 			tables = {
 				trim_whitespace = true,
 				format_on_move = true,

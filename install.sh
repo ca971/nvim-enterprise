@@ -21,12 +21,12 @@ echo -e "${BLUE}🚀 Starting NvimEnterprise Installation...${NC}\n"
 echo -e "${YELLOW}${INFO} Checking dependencies...${NC}"
 
 check_dep() {
-    if ! command -v $1 &> /dev/null; then
-        echo -e "${RED}✘ Error: $1 is not installed.${NC}"
-        exit 1
-    else
-        echo -e "${GREEN}${CHECK} $1 found.${NC}"
-    fi
+  if ! command -v $1 &> /dev/null; then
+    echo -e "${RED}✘ Error: $1 is not installed.${NC}"
+    exit 1
+  else
+    echo -e "${GREEN}${CHECK} $1 found.${NC}"
+  fi
 }
 
 check_dep "nvim"
@@ -43,9 +43,9 @@ NVIM_CONFIG="$HOME/.config/nvim"
 BACKUP_DIR="$HOME/.config/nvim.bak.$(date +%Y%m%d_%H%M%S)"
 
 if [ -d "$NVIM_CONFIG" ]; then
-    echo -e "${YELLOW}${INFO} Existing configuration found. Moving to $BACKUP_DIR...${NC}"
-    mv "$NVIM_CONFIG" "$BACKUP_DIR"
-    echo -e "${GREEN}${CHECK} Backup complete.${NC}"
+  echo -e "${YELLOW}${INFO} Existing configuration found. Moving to $BACKUP_DIR...${NC}"
+  mv "$NVIM_CONFIG" "$BACKUP_DIR"
+  echo -e "${GREEN}${CHECK} Backup complete.${NC}"
 fi
 
 # --- 3. Deployment ---

@@ -841,6 +841,7 @@ M.lang = {
 	rust = "",
 	sass = "",
 	scala = "",
+	sh = " ",
 	solidity = "",
 	sql = "",
 	stylus = "",

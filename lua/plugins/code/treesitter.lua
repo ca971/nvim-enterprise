@@ -3,7 +3,7 @@
 ---@module "plugins.code.treesitter"
 ---@author ca971
 ---@license MIT
----@version 1.4.0
+---@version 1.1.0
 ---@since 2026-01
 ---
 ---@see core.platform  Compiler detection gates parser auto-install
@@ -87,7 +87,6 @@
 --- ║  └───────────┴───────────┴────────────────────────────────────────┘      ║
 --- ╚══════════════════════════════════════════════════════════════════════════╝
 
-local platform = require("core.platform")
 local icons = require("core.icons")
 
 -- ═══════════════════════════════════════════════════════════════════════
@@ -96,18 +95,11 @@ local icons = require("core.icons")
 
 ---@type table<string, number>
 local PERF = {
-	max_filesize = 100 * 1024,
+	large_file_lines = 10000,
+	large_file_size = 1024 * 1024, -- 1 MiB
 	context_max_lines = 3,
-	context_min_window = 20,
+	context_min_window = 10,
 }
-
----@type boolean
-local has_compiler = platform.runtimes.gcc
-	or platform.runtimes.gpp
-	or platform.runtimes.cpp
-	or platform.runtimes.zig
-	or platform:has_executable("cc")
-	or platform:has_executable("clang")
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- BASE PARSER REGISTRY
@@ -115,34 +107,53 @@ local has_compiler = platform.runtimes.gcc
 
 ---@type string[]
 local BASE_PARSERS = {
-	"lua",
-	"luadoc",
-	"luap",
-	"vim",
-	"vimdoc",
-	"query",
-	"regex",
-	"markdown",
-	"markdown_inline",
+	"bash",
+	"c",
+	"comment",
+	"diff",
 	"git_config",
 	"git_rebase",
 	"gitattributes",
 	"gitcommit",
 	"gitignore",
-	"comment",
-	"diff",
+	"html",
+	"javascript",
+	"jsdoc",
+	"json",
+	"jsonc",
+	"lua",
+	"luadoc",
+	"luap",
+	"markdown",
+	"markdown_inline",
+	"printf",
+	"python",
+	"query",
+	"regex",
+	"toml",
+	"tsx",
+	"typescript",
+	"vim",
+	"vimdoc",
+	"xml",
+	"yaml",
 }
+--- Large-file guard for treesitter features.
+---@param _lang string
+---@param buf number
+---@return boolean
+local function is_large_file(_lang, buf)
+	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+	if ok and stats and stats.size > PERF.large_file_size then return true end
+	if vim.api.nvim_buf_line_count(buf) > PERF.large_file_lines then return true end
+	return false
+end
 
--- ═══════════════════════════════════════════════════════════════════════
--- HELPERS
--- ═══════════════════════════════════════════════════════════════════════
-
+--- Remove duplicates from a list.
 ---@param list string[]
 ---@return string[]
----@private
 local function deduplicate(list)
-	local seen = {}
-	local result = {}
+	local seen, result = {}, {}
 	for _, v in ipairs(list) do
 		if not seen[v] then
 			seen[v] = true
@@ -152,71 +163,54 @@ local function deduplicate(list)
 	return result
 end
 
----@param _lang string
----@param buf number
----@return boolean
----@private
-local function is_large_file(_lang, buf)
-	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-	if ok and stats and stats.size > PERF.max_filesize then
-		if not vim.b[buf]._ts_large_file_warned then
-			vim.b[buf]._ts_large_file_warned = true
-			vim.notify(
-				string.format("Treesitter disabled: file exceeds %dKB", PERF.max_filesize / 1024),
-				vim.log.levels.WARN,
-				{ title = "Treesitter" }
-			)
-		end
-		return true
-	end
-	return false
-end
-
----@return boolean
----@private
-local function setup_repeatable_moves()
-	local ok, ts_repeat = pcall(require, "nvim-treesitter.textobjects.repeatable_move")
-	if not ok then return false end
-
-	--stylua: ignore start
-	vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat.repeat_last_move_next,      { desc = "Repeat last TS move →" })
-	vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat.repeat_last_move_previous,   { desc = "Repeat last TS move ←" })
-	vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat.builtin_f_expr, { expr = true, desc = "Find char →" })
-	vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat.builtin_F_expr, { expr = true, desc = "Find char ←" })
-	vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat.builtin_t_expr, { expr = true, desc = "Till char →" })
-	vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat.builtin_T_expr, { expr = true, desc = "Till char ←" })
-	--stylua: ignore end
-
-	return true
-end
-
 -- ═══════════════════════════════════════════════════════════════════════
--- NEW API SETUP (post-2024 nvim-treesitter rewrite)
---
--- When require("nvim-treesitter.configs") doesn't exist, we set up
--- each feature manually using Neovim's built-in treesitter APIs
--- and the textobjects plugin's own setup function.
+-- NEW-API COMPAT LAYER (nvim-treesitter 2025 rewrite)
 -- ═══════════════════════════════════════════════════════════════════════
 
---- Install parsers via :TSInstall (deferred to avoid blocking startup).
----
----@param parsers string[] List of parser names
----@param auto boolean Whether auto-install is enabled
+--- Install parsers via :TSInstall when the old configs module is gone.
+---@param parsers string[]|nil
+---@param auto boolean
 ---@private
 local function new_api_install_parsers(parsers, auto)
 	if not parsers or #parsers == 0 then return end
 	if not auto then return end
 
 	vim.defer_fn(function()
-		-- Use :TSInstall! (bang = silent, no error if already installed)
 		local cmd = "silent! TSInstall! " .. table.concat(parsers, " ")
 		pcall(vim.cmd, cmd)
 	end, 500)
 end
 
+-- FIX: auto-install on FileType for parsers not yet installed (new API)
+---@param auto boolean
+---@private
+local function new_api_auto_install_on_ft(auto)
+	if not auto then return end
+
+	local group = vim.api.nvim_create_augroup("TSAutoInstallFT", { clear = true })
+
+	vim.api.nvim_create_autocmd("FileType", {
+		group = group,
+		callback = function(ev)
+			local ft = vim.bo[ev.buf].filetype
+			if not ft or ft == "" then return end
+
+			local lang = vim.treesitter.language.get_lang(ft) or ft
+
+			-- If parser is already available, nothing to do
+			local ok = pcall(vim.treesitter.language.add, lang)
+			if ok then return end
+
+			-- Try to install the parser
+			vim.defer_fn(function()
+				pcall(vim.cmd, "silent! TSInstall! " .. lang)
+			end, 100)
+		end,
+	})
+end
+
 --- Enable treesitter highlighting via Neovim's built-in vim.treesitter.start().
----
----@param highlight_opts table|nil Highlight options from user config
+---@param highlight_opts table|nil
 ---@private
 local function new_api_enable_highlight(highlight_opts)
 	if not highlight_opts or highlight_opts.enable == false then return end
@@ -227,32 +221,46 @@ local function new_api_enable_highlight(highlight_opts)
 		group = group,
 		callback = function(ev)
 			local buf = ev.buf
+			local ft = vim.bo[buf].filetype
+			if not ft or ft == "" then return end
 
-			-- Skip if buffer is too large
+			-- ── FIX 1: skip non-file buffers (plugin UIs) ────────────
+			-- Buffers from noice, lazy, mason, neo-tree, etc. have
+			-- buftype set to "nofile", "prompt", "acwrite", etc.
+			-- Only real file buffers have buftype = ""
+			local bt = vim.bo[buf].buftype
+			if bt ~= "" then return end
+
+			-- Resolve treesitter language from filetype mapping
+			local lang = vim.treesitter.language.get_lang(ft) or ft
+
+			-- Skip if buffer is too large (function form)
 			if type(highlight_opts.disable) == "function" then
-				local ft = vim.bo[buf].filetype
-				local lang = ft
-				pcall(function()
-					lang = vim.treesitter.language.get_lang(ft) or ft
-				end)
 				if highlight_opts.disable(lang, buf) then return end
 			end
 
 			-- Skip disabled filetypes (list form)
 			if type(highlight_opts.disable) == "table" then
-				local ft = vim.bo[buf].filetype
 				if vim.tbl_contains(highlight_opts.disable, ft) then return end
 			end
 
-			-- Start treesitter highlighting (built-in Neovim API)
-			pcall(vim.treesitter.start, buf)
+			-- ── FIX 2: verify parser actually exists ─────────────────
+			-- vim.treesitter.language.add() can silently succeed on
+			-- some Neovim versions even without a parser installed.
+			-- Double-check with get_lang + inspecting the parser.
+			local parser_ok = pcall(vim.treesitter.language.add, lang)
+			if not parser_ok then return end
+
+			-- ── FIX 3: pcall around start — last line of defense ─────
+			-- Even if language.add succeeded, the parser .so might be
+			-- missing or incompatible. Never let this crash.
+			pcall(vim.treesitter.start, buf, lang)
 		end,
 	})
 end
 
 --- Enable treesitter-based indentation.
----
----@param indent_opts table|nil Indent options from user config
+---@param indent_opts table|nil
 ---@private
 local function new_api_enable_indent(indent_opts)
 	if not indent_opts or indent_opts.enable == false then return end
@@ -271,8 +279,7 @@ local function new_api_enable_indent(indent_opts)
 end
 
 --- Enable incremental selection keymaps.
----
----@param incr_opts table|nil Incremental selection options
+---@param incr_opts table|nil
 ---@private
 local function new_api_enable_incremental_selection(incr_opts)
 	if not incr_opts or incr_opts.enable == false then return end
@@ -307,14 +314,12 @@ local function new_api_enable_incremental_selection(incr_opts)
 end
 
 --- Setup textobjects via the plugin's own API.
----
----@param full_opts table The full opts table (textobjects expects it at top level)
+---@param full_opts table
 ---@private
 local function new_api_setup_textobjects(full_opts)
 	if not full_opts.textobjects then return end
 
 	vim.defer_fn(function()
-		-- nvim-treesitter-textobjects may expose its own setup
 		local ok, ts_to = pcall(require, "nvim-treesitter-textobjects")
 		if ok and type(ts_to.setup) == "function" then ts_to.setup(full_opts) end
 	end, 200)
@@ -327,13 +332,17 @@ end
 return {
 
 	-- ─────────────────────────────────────────────────────────────────
-	-- nvim-treesitter — AST-based highlighting, indentation, selection
+	-- nvim-treesitter
 	-- ─────────────────────────────────────────────────────────────────
 	{
 		"nvim-treesitter/nvim-treesitter",
 		version = false,
 		build = ":TSUpdate",
 		lazy = false,
+
+		-- FIX: tell lazy.nvim to EXTEND (concatenate) ensure_installed
+		-- instead of replacing it when merging opts from langs/*.lua
+		opts_extend = { "ensure_installed" },
 
 		cmd = { "TSUpdate", "TSInstall", "TSUninstall", "TSInstallInfo", "TSModuleInfo" },
 
@@ -347,29 +356,24 @@ return {
 			if type(opts.ensure_installed) == "table" then opts.ensure_installed = deduplicate(opts.ensure_installed) end
 
 			-- ── Dual API support ─────────────────────────────────────
-			-- Old nvim-treesitter: require("nvim-treesitter.configs").setup()
-			--   → all features configured in one call
-			-- New nvim-treesitter (2025 rewrite):
-			--   → configs module removed
-			--   → highlighting via vim.treesitter.start() (Neovim built-in)
-			--   → parser install via :TSInstall commands
-			--   → textobjects plugin has its own setup
 			local has_configs, ts_configs = pcall(require, "nvim-treesitter.configs")
 
 			if has_configs and type(ts_configs.setup) == "function" then
 				-- ── Old API: single setup call handles everything ─────
 				ts_configs.setup(opts)
 			else
-				-- Try the new module's setup for parser management
+				-- ── New API (2025 rewrite) ────────────────────────────
 				local ok_ts, nvim_ts = pcall(require, "nvim-treesitter")
 				if ok_ts and type(nvim_ts.setup) == "function" then
 					pcall(nvim_ts.setup, {
 						ensure_install = opts.ensure_installed,
 					})
 				else
-					-- Fallback: install parsers via command
 					new_api_install_parsers(opts.ensure_installed, opts.auto_install ~= false)
 				end
+
+				-- FIX: enable auto-install on FileType for new API
+				new_api_auto_install_on_ft(opts.auto_install ~= false)
 
 				-- Enable each feature individually
 				new_api_enable_highlight(opts.highlight)
@@ -378,7 +382,7 @@ return {
 				new_api_setup_textobjects(opts)
 			end
 
-			-- ── which-key groups for swap & peek ─────────────────────
+			-- ── which-key groups ─────────────────────────────────────
 			local wk_ok, wk = pcall(require, "which-key")
 			if wk_ok then
 				wk.add({
@@ -406,26 +410,23 @@ return {
 			incremental_selection = {
 				enable = true,
 				keymaps = {
-					init_selection = "<C-space>",
-					node_incremental = "<C-space>",
+					init_selection = "<C-k>",
+					node_incremental = "<C-k>",
 					scope_incremental = false,
 					node_decremental = "<bs>",
 				},
 			},
 
 			textobjects = {
-
 				select = {
 					enable = true,
 					lookahead = true,
 					include_surrounding_whitespace = true,
-
 					selection_modes = {
 						["@parameter.outer"] = "v",
 						["@function.outer"] = "V",
 						["@class.outer"] = "V",
 					},
-
 					keymaps = {
 						["af"] = { query = "@function.outer", desc = "Around function" },
 						["if"] = { query = "@function.inner", desc = "Inside function" },
@@ -451,11 +452,9 @@ return {
 						["i/"] = { query = "@comment.inner", desc = "Inside comment" },
 					},
 				},
-
 				move = {
 					enable = true,
 					set_jumps = true,
-
 					goto_next_start = {
 						["]f"] = { query = "@function.outer", desc = "Next function start" },
 						["]c"] = { query = "@class.outer", desc = "Next class start" },
@@ -463,12 +462,10 @@ return {
 						["]o"] = { query = "@conditional.outer", desc = "Next conditional" },
 						["]r"] = { query = "@return.outer", desc = "Next return" },
 					},
-
 					goto_next_end = {
 						["]F"] = { query = "@function.outer", desc = "Next function end" },
 						["]C"] = { query = "@class.outer", desc = "Next class end" },
 					},
-
 					goto_previous_start = {
 						["[f"] = { query = "@function.outer", desc = "Prev function start" },
 						["[c"] = { query = "@class.outer", desc = "Prev class start" },
@@ -476,32 +473,26 @@ return {
 						["[o"] = { query = "@conditional.outer", desc = "Prev conditional" },
 						["[r"] = { query = "@return.outer", desc = "Prev return" },
 					},
-
 					goto_previous_end = {
 						["[F"] = { query = "@function.outer", desc = "Prev function end" },
 						["[C"] = { query = "@class.outer", desc = "Prev class end" },
 					},
 				},
-
 				swap = {
 					enable = true,
-
 					swap_next = {
 						["<leader>Sa"] = { query = "@parameter.inner", desc = "Swap argument → next" },
 						["<leader>Sf"] = { query = "@function.outer", desc = "Swap function → next" },
 					},
-
 					swap_previous = {
 						["<leader>SA"] = { query = "@parameter.inner", desc = "Swap argument ← prev" },
 						["<leader>SF"] = { query = "@function.outer", desc = "Swap function ← prev" },
 					},
 				},
-
 				lsp_interop = {
 					enable = true,
 					border = icons.borders and icons.borders.Rounded or "rounded",
 					floating_preview_opts = {},
-
 					peek_definition_code = {
 						["<leader>cpf"] = { query = "@function.outer", desc = "Peek function definition" },
 						["<leader>cpc"] = { query = "@class.outer", desc = "Peek class definition" },
@@ -512,7 +503,7 @@ return {
 	},
 
 	-- ─────────────────────────────────────────────────────────────────
-	-- nvim-treesitter-context — Sticky code context at top of buffer
+	-- nvim-treesitter-context
 	-- ─────────────────────────────────────────────────────────────────
 	{
 		"nvim-treesitter/nvim-treesitter-context",
@@ -555,7 +546,6 @@ return {
 			vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { link = "CursorLineNr" })
 			vim.api.nvim_set_hl(0, "TreesitterContextSeparator", { link = "Comment" })
 
-			-- sp requires #rrggbb, not a hl group name
 			local comment_hl = vim.api.nvim_get_hl(0, { name = "Comment", link = false })
 			local sp_color = comment_hl.fg and string.format("#%06x", comment_hl.fg) or nil
 			vim.api.nvim_set_hl(0, "TreesitterContextBottom", {

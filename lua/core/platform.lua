@@ -113,10 +113,12 @@ local Platform = Class:extend("Platform") --[[@as Platform]]
 
 ---@type table<string, string|string[]>
 local RUNTIME_EXECUTABLES = {
-	cpp = "c++",
-	gcc = "gcc",
+	-- bash = "bash",
+	-- cpp = "c++",
+	dart = "dart",
+	-- gcc = "gcc",
 	go = "go",
-	gpp = "g++",
+	-- gpp = "g++",
 	haskell = "haskell",
 	java = "java",
 	julia = "julia",
@@ -136,7 +138,7 @@ local RUNTIME_EXECUTABLES = {
 	terraform = "terraform",
 	vim = "vim",
 	zig = "zig",
-	dart = "dart",
+	zsh = "zsh",
 }
 
 -- ═══════════════════════════════════════════════════════════════════════

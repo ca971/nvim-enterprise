@@ -134,22 +134,28 @@ return {
 		},
 	},
 
-	opts_extend = { "formatters_by_ft" },
+	-- ╔═══════════════════════════════════════════════════════════════╗
+	-- ║  DO NOT use opts_extend for formatters_by_ft!                 ║
+	-- ║                                                               ║
+	-- ║  opts_extend treats the value as a LIST and concatenates.     ║
+	-- ║  formatters_by_ft is a DICT — lazy.nvim deep-merges dicts     ║
+	-- ║  automatically. opts_extend corrupts the merge.               ║
+	-- ║                                                               ║
+	-- ║  langs/*.lua specs with the same plugin name are deep-merged  ║
+	-- ║  by lazy.nvim automatically:                                  ║
+	-- ║                                                               ║
+	-- ║  Base:    formatters_by_ft = { lua = {"stylua"} }             ║
+	-- ║  Lang:    formatters_by_ft = { nu  = {"topiary_nu"} }         ║
+	-- ║  Result:  formatters_by_ft = { lua = {"stylua"},              ║
+	-- ║                                nu  = {"topiary_nu"} }         ║
+	-- ╚═══════════════════════════════════════════════════════════════╝
 
 	---@type conform.setupOpts
 	opts = {
-		-- ── Formatters by filetype ───────────────────────────────────
-		-- Only Lua is configured here. All other languages add their
-		-- formatters in langs/*.lua via opts_extend mechanism:
-		--
-		--   -- In langs/python.lua:
-		--   opts = { formatters_by_ft = { python = { "ruff_format" } } }
-		--
 		formatters_by_ft = {
 			lua = { "stylua" },
 		},
 
-		-- ── Default format options ───────────────────────────────────
 		default_format_opts = {
 			timeout_ms = format_timeout,
 			async = false,
@@ -157,49 +163,20 @@ return {
 			lsp_format = "fallback",
 		},
 
-		-- ── Format on save (dynamic) ─────────────────────────────────
-		-- Function-based to support:
-		--   1. Runtime toggle via <leader>uf / <leader>uF
-		--   2. Per-buffer disable via vim.b.disable_autoformat
-		--   3. Large file guard (>1MB → skip)
 		---@param bufnr number
 		---@return conform.FormatOpts|nil
 		format_on_save = function(bufnr)
 			if not format_on_save_enabled then return nil end
-
 			if vim.b[bufnr].disable_autoformat then return nil end
-
 			if is_large_file(bufnr) then return nil end
-
 			return {
 				timeout_ms = format_timeout,
 				lsp_format = "fallback",
 			}
 		end,
 
-		-- ── Error notifications ──────────────────────────────────────
 		notify_on_error = true,
 
-		-- ── Formatter-specific options ───────────────────────────────
-		-- NO hardcoded args here. Each formatter reads its config
-		-- from the project root automatically:
-		--
-		--   stylua    → .stylua.toml
-		--   prettier  → .prettierrc / .prettierrc.json / .prettierrc.yml
-		--   ruff      → pyproject.toml [tool.ruff] / ruff.toml
-		--   rustfmt   → rustfmt.toml
-		--   clang-fmt → .clang-format
-		--   gofumpt   → (go module settings)
-		--   rubocop   → .rubocop.yml
-		--
-		-- If you need to override a formatter globally (not per-project),
-		-- add it here with prepend_args:
-		--
-		--   formatters = {
-		--       stylua = {
-		--           prepend_args = { "--indent-type", "Tabs" },
-		--       },
-		--   },
 		formatters = {},
 	},
 }

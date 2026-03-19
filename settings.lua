@@ -415,12 +415,12 @@ return {
 	---   Available:
 	---   "angular", "ansible", "astro", "c", "clojure", "cmake", "cpp",
 	---   "css", "csv", "dart", "docker", "dotnet", "elixir", "elm",
-	---   "ember", "erlang", "git", "gleam", "go", "haskell", "helm",
+	---   "ember", "erlang", "fish", "git", "gleam", "go", "haskell", "helm",
 	---   "html", "java", "javascript", "json", "julia", "kotlin", "lean",
 	---   "lua", "markdown", "nix", "nushell", "ocaml", "php", "prisma",
-	---   "python", "r", "rego", "ruby", "rust", "scala", "solidity",
+	---   "python", "r", "rego", "ruby", "rust", "scala", "sh", "solidity",
 	---   "sql", "svelte", "tailwind", "terraform", "tex", "thrift",
-	---   "toml", "twig", "typescript", "vim", "vue", "xml", "yaml", "zig"
+	---   "toml", "twig", "typescript", "vim", "vue", "xml", "yaml", "zig", "zsh",
 	---@class LanguageSettings
 	languages = {
 		---@type string[]
@@ -441,6 +441,7 @@ return {
 			"elm",
 			"ember",
 			"erlang",
+			"fish",
 			"git",
 			"gleam",
 			"go",
@@ -466,6 +467,7 @@ return {
 			"ruby",
 			"rust",
 			"scala",
+			"sh",
 			"solidity",
 			"sql",
 			"svelte",
@@ -481,6 +483,7 @@ return {
 			"xml",
 			"yaml",
 			"zig",
+			"zsh",
 		},
 	},
 
