@@ -821,22 +821,9 @@ return {
 		event = { "InsertEnter", "CmdlineEnter" },
 		dependencies = {
 			-- ── Snippet engine ─────────────────────────────────────
-			{
-				"L3MON4D3/LuaSnip",
-				version = "v2.*",
-				build = "make install_jsregexp",
-				dependencies = {
-					{
-						"rafamadriz/friendly-snippets",
-						config = function()
-							local loader = require("luasnip.loaders.from_vscode")
-							loader.lazy_load()
-							local custom_path = vim.fn.stdpath("config") .. "/snippets"
-							if (vim.uv or vim.loop).fs_stat(custom_path) then loader.lazy_load({ paths = { custom_path } }) end
-						end,
-					},
-				},
-			},
+			-- Full spec in lua/plugins/code/luasnip.lua
+			-- lazy.nvim merges specs automatically.
+			"L3MON4D3/LuaSnip",
 
 			-- ── Blink extensions ───────────────────────────────────
 			{ "saghen/blink.compat", version = "*", lazy = true, opts = {} },

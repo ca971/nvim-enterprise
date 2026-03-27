@@ -1,0 +1,7 @@
+{
+  "Local function": {
+    "prefix": "lfn",
+    "body": ["local function ${1:name}(${2:params})", "\t${0}", "end"],
+    "description": "Local function declaration"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Current date": {
+    "prefix": "ddate",
+    "body": "$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
+    "description": "Insert current date (YYYY-MM-DD)"
+  },
+  "TODO comment": {
+    "prefix": "ttodo",
+    "body": "${LINE_COMMENT} TODO(${1:author}): ${2:description}",
+    "description": "TODO comment with author"
+  }
+}
