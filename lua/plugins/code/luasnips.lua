@@ -99,7 +99,7 @@ return {
 		},
 	},
 
-	---@type luasnip.Config
+	---@type table
 	opts = {
 		-- Re-enter recently exited snippets with jump keys
 		history = true,
