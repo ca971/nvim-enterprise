@@ -3,7 +3,7 @@
 ---@module "plugins.editor.which-key"
 ---@author ca971
 ---@license MIT
----@version 1.0.0
+---@version 1.1.0
 ---@since 2026-01
 ---
 ---@see core.keymaps     Centralized group definitions and keymap setup
@@ -21,13 +21,18 @@
 --- ║  │  • Modern preset with custom layout and centered title          │     ║
 --- ║  │  • Theme-adaptive highlights with ColorScheme autocmd           │     ║
 --- ║  │  • 9-color icon tint palette (azure..yellow)                    │     ║
---- ║  │  • 60+ custom icon rules for auto-matching descriptions         │     ║
+--- ║  │  • 70+ custom icon rules for auto-matching descriptions         │     ║
 --- ║  │  • Inline spec decorations for root shortcuts                   │     ║
 --- ║  │  • Pretty key labels and description cleanup patterns           │     ║
 --- ║  │  • Plugin integration (marks, registers, spelling, presets)     │     ║
 --- ║  │  • Extensible spec via lazy.nvim opts_extend                    │     ║
 --- ║  │  • LazyVim <leader>l conflict resolution                        │     ║
 --- ║  └─────────────────────────────────────────────────────────────────┘     ║
+--- ║                                                                          ║
+--- ║  Changelog:                                                              ║
+--- ║  • 1.1.0 — Added icon rules for neotest, yanky, luasnip                  ║
+--- ║            Added spec decorations for yank ring cycling                  ║
+--- ║            Added neotest group spec with test icon                       ║
 --- ║                                                                          ║
 --- ║  Optimizations:                                                          ║
 --- ║  • VeryLazy event loading                                                ║
@@ -145,6 +150,35 @@ local icon_rules = {
 	{ pattern = "supermaven",  icon = icons.kinds.Supermaven,  color = "purple" },
 	{ pattern = "edgy",        icon = icons.ui.Window,        color = "blue" },
 	{ pattern = "bufferline",  icon = icons.ui.Tab,           color = "blue" },
+
+	-- ── Testing (neotest) ────────────────────────────────────────────  -- NEW
+	{ pattern = "neotest",       icon = "󰙨",                    color = "green" },
+	{ pattern = "run nearest",   icon = "󰙨",                    color = "green" },
+	{ pattern = "run current",   icon = "󰙨",                    color = "green" },
+	{ pattern = "run last",      icon = "󰑐",                    color = "green" },
+	{ pattern = "test suite",    icon = "󰙨",                    color = "green" },
+	{ pattern = "debug.*test",   icon = "󰃤",                    color = "red" },
+	{ pattern = "test.*debug",   icon = "󰃤",                    color = "red" },
+	{ pattern = "stop.*test",    icon = "󰓛",                    color = "red" },
+	{ pattern = "watch",         icon = "󰈞",                    color = "yellow" },
+	{ pattern = "summary",       icon = "󰙅",                    color = "green" },
+	{ pattern = "output panel",  icon = "",                    color = "cyan" },
+	{ pattern = "output",        icon = "",                    color = "cyan" },
+	{ pattern = "failed test",   icon = "󰙨",                    color = "red" },
+
+	-- ── Yank / Yanky ────────────────────────────────────────────────  -- NEW
+	{ pattern = "yank history",  icon = "󰗚",                    color = "yellow" },
+	{ pattern = "yank ring",     icon = "󰄬",                    color = "yellow" },
+	{ pattern = "cycle.*yank",   icon = "󰄬",                    color = "yellow" },
+	{ pattern = "yanky",         icon = icons.ui.Copy,          color = "yellow" },
+	{ pattern = "put after",     icon = "󰅌",                    color = "yellow" },
+	{ pattern = "put before",    icon = "󰅌",                    color = "yellow" },
+
+	-- ── Snippets (LuaSnip) ──────────────────────────────────────────  -- NEW
+	{ pattern = "luasnip",       icon = icons.kinds.Snippet,    color = "green" },
+	{ pattern = "snippet.*jump", icon = icons.kinds.Snippet,    color = "green" },
+	{ pattern = "snippet.*exp",  icon = icons.kinds.Snippet,    color = "green" },
+	{ pattern = "snippet.*choi", icon = "󰧑",                    color = "purple" },
 
 	-- ── Git actions ──────────────────────────────────────────────────
 	{ pattern = "hunk",    icon = icons.git.Diff,     color = "orange" },
@@ -274,6 +308,21 @@ return {
 				mode = { "n", "x", "o" },
 				{ "s", icon = { icon = "󰉁", color = "yellow" } },
 				{ "S", icon = { icon = "󰉁", color = "purple" } },
+			},
+
+			-- ── Neotest group ────────────────────────────────────── -- NEW
+			{ "<leader>n", group = "neotest", icon = { icon = "󰙨", color = "green" } },
+
+			-- ── Yanky ring cycling ───────────────────────────────── -- NEW
+			{ "[y", icon = { icon = "󰄬", color = "yellow" } },
+			{ "]y", icon = { icon = "󰄬", color = "yellow" } },
+
+			-- ── Snippet navigation (LuaSnip) ─────────────────────── -- NEW
+			{
+				mode = { "i", "s" },
+				{ "<M-l>", icon = { icon = icons.kinds.Snippet, color = "green" } },
+				{ "<M-h>", icon = { icon = icons.kinds.Snippet, color = "green" } },
+				{ "<M-n>", icon = { icon = "󰧑", color = "purple" } },
 			},
 		},
 
