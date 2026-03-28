@@ -786,4 +786,19 @@ return {
 			ensure_installed = { "js" },
 		},
 	},
+	{
+		"nvim-neotest/neotest",
+		optional = true,
+		dependencies = {
+			{ "marilari88/neotest-vitest", lazy = true },
+		},
+		opts = function(_, opts)
+			opts.adapters = opts.adapters or {}
+			-- Guard duplicate (JS + TS both add vitest)
+			for _, adapter in ipairs(opts.adapters) do
+				if type(adapter) == "table" and adapter.name == "neotest-vitest" then return end
+			end
+			table.insert(opts.adapters, require("neotest-vitest"))
+		end,
+	},
 }

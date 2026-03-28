@@ -766,4 +766,23 @@ return {
 			ensure_installed = { "delve" },
 		},
 	},
+
+	-- ── NEOTEST (Go adapter) ──────────────────────────────────────────
+	{
+		"nvim-neotest/neotest",
+		optional = true,
+		dependencies = {
+			{ "nvim-neotest/neotest-go", lazy = true },
+		},
+		opts = function(_, opts)
+			opts.adapters = opts.adapters or {}
+			table.insert(
+				opts.adapters,
+				require("neotest-go")({
+					recursive_run = true,
+					args = { "-count=1", "-race" },
+				})
+			)
+		end,
+	},
 }

@@ -1,26 +1,39 @@
 ---@file lua/plugins/code/neotest.lua
----@description Neotest — test runner framework with per-language adapters
+---@description Neotest — test runner framework (core configuration only)
 ---@module "plugins.code.neotest"
----@version 1.0.0
+---@version 2.0.0
 ---@since 2026-03
 ---@see https://github.com/nvim-neotest/neotest
+---@see langs.python     Python adapter registration (neotest-python)
+---@see langs.javascript JavaScript adapter registration (neotest-vitest/jest)
+---@see langs.typescript TypeScript adapter registration (neotest-vitest/jest)
+---@see langs.go         Go adapter registration (neotest-go)
+---@see langs.rust       Rust adapter registration (neotest-rust)
+---@see langs.lua        Lua adapter registration (neotest-plenary)
 ---
 --- ╔══════════════════════════════════════════════════════════════════════════╗
---- ║  plugins/code/neotest.lua — Test runner                                  ║
+--- ║  plugins/code/neotest.lua — Test runner (core)                           ║
 --- ║                                                                          ║
 --- ║  Architecture:                                                           ║
 --- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
---- ║  │  neotest                                                         │    ║
---- ║  │  ├─ Adapters (conditional on binary availability)                │    ║
---- ║  │  │  ├─ neotest-python     (pytest, unittest)                     │    ║
---- ║  │  │  ├─ neotest-vitest     (Vitest for JS/TS)                     │    ║
---- ║  │  │  ├─ neotest-jest       (Jest for JS/TS)                       │    ║
---- ║  │  │  ├─ neotest-go         (go test)                              │    ║
---- ║  │  │  ├─ neotest-rust       (cargo test via cargo-nextest)         │    ║
---- ║  │  │  └─ neotest-lua        (busted/plenary)                       │    ║
---- ║  │  │                                                               │    ║
---- ║  │  ├─ DAP integration       (debug nearest test)                   │    ║
---- ║  │  └─ Summary panel         (tree view of test results)            │    ║
+--- ║  │  neotest (this file — core only)                                 │    ║
+--- ║  │  ├─ UI configuration       (summary, output, floating, icons)    │    ║
+--- ║  │  ├─ Keymaps                (<Space>n namespace)                  │    ║
+--- ║  │  ├─ Status                 (virtual text, signs, diagnostics)    │    ║
+--- ║  │  └─ Adapters = {}          (empty — populated by langs/*.lua)    │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Adapter registration (in each lua/langs/*.lua file):            │    ║
+--- ║  │  ┌──────────────────────────────────────────────────────────┐    │    ║
+--- ║  │  │  {                                                       │    │    ║
+--- ║  │  │    "nvim-neotest/neotest",                               │    │    ║
+--- ║  │  │    optional = true,                                      │    │    ║
+--- ║  │  │    dependencies = { "adapter-plugin" },                  │    │    ║
+--- ║  │  │    opts = function(_, opts)                              │    │    ║
+--- ║  │  │      opts.adapters = opts.adapters or {}                 │    │    ║
+--- ║  │  │      table.insert(opts.adapters, require("adapter")({})) │    │    ║
+--- ║  │  │    end,                                                  │    │    ║
+--- ║  │  │  }                                                       │    │    ║
+--- ║  │  └──────────────────────────────────────────────────────────┘    │    ║
 --- ║  │                                                                  │    ║
 --- ║  │  Keymaps (<Space>n namespace):                                   │    ║
 --- ║  │  ┌────────────┬──────────────────────────────────────────┐       │    ║
@@ -40,7 +53,8 @@
 --- ║  │  └────────────┴──────────────────────────────────────────┘       │    ║
 --- ║  │                                                                  │    ║
 --- ║  │  Design decisions:                                               │    ║
---- ║  │  ├─ Adapters loaded only if runtime binary exists (has())        │    ║
+--- ║  │  ├─ Zero adapters in core (all from langs/ — hot-loaded)         │    ║
+--- ║  │  ├─ Adapters only loaded when their filetype is opened           │    ║
 --- ║  │  ├─ DAP strategy for debug: reuses existing nvim-dap config      │    ║
 --- ║  │  ├─ Summary panel opens on the right (consistent with neo-tree)  │    ║
 --- ║  │  ├─ Output in floating window (not split) for focus              │    ║
@@ -48,115 +62,33 @@
 --- ║  └──────────────────────────────────────────────────────────────────┘    ║
 --- ╚══════════════════════════════════════════════════════════════════════════╝
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- GUARD
+-- ═══════════════════════════════════════════════════════════════════════════
+
 local settings = require("core.settings")
 if not settings:is_plugin_enabled("neotest") then return {} end
 
 local icons = require("core.icons")
-
--- ═══════════════════════════════════════════════════════════════════════
--- ADAPTER BUILDER
---
--- Each adapter is conditionally loaded based on runtime availability.
--- This prevents errors when a language toolchain is not installed.
--- ═══════════════════════════════════════════════════════════════════════
-
----@alias AdapterSpec { plugin: string, binary: string, setup: fun(): table }
-
---- Adapter definitions — only loaded if the binary is found in PATH.
----@type AdapterSpec[]
----@private
-local ADAPTER_SPECS = {
-	{
-		plugin = "nvim-neotest/neotest-python",
-		binary = "python3",
-		setup = function()
-			return require("neotest-python")({
-				dap = { justMyCode = false },
-				runner = "pytest",
-				args = { "--tb=short", "-q" },
-			})
-		end,
-	},
-	{
-		plugin = "marilari88/neotest-vitest",
-		binary = "npx",
-		setup = function()
-			return require("neotest-vitest")
-		end,
-	},
-	{
-		plugin = "nvim-neotest/neotest-jest",
-		binary = "npx",
-		setup = function()
-			return require("neotest-jest")({
-				jestCommand = "npx jest",
-				cwd = function()
-					return vim.fn.getcwd()
-				end,
-			})
-		end,
-	},
-	{
-		plugin = "nvim-neotest/neotest-go",
-		binary = "go",
-		setup = function()
-			return require("neotest-go")({
-				recursive_run = true,
-				args = { "-count=1", "-race" },
-			})
-		end,
-	},
-	{
-		plugin = "rouge8/neotest-rust",
-		binary = "cargo",
-		setup = function()
-			return require("neotest-rust")({
-				args = { "--no-capture" },
-			})
-		end,
-	},
-}
-
---- Build the list of available adapters based on installed binaries.
----
----@return table[] adapters Configured adapter instances
----@return string[] plugins Plugin specs for lazy.nvim dependencies
----@private
-local function build_adapters()
-	local adapters = {}
-	local plugins = {}
-
-	for _, spec in ipairs(ADAPTER_SPECS) do
-		if vim.fn.executable(spec.binary) == 1 then
-			table.insert(plugins, { spec.plugin, lazy = true })
-			-- Adapter setup is deferred to config time
-		end
-	end
-
-	return adapters, plugins
-end
-
-local _, adapter_plugins = build_adapters()
-
--- ═══════════════════════════════════════════════════════════════════════
--- PLUGIN SPEC
--- ═══════════════════════════════════════════════════════════════════════
-
 local float_border = settings:get("ui.float_border", "rounded")
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- PLUGIN SPEC
+-- ═══════════════════════════════════════════════════════════════════════════
 
 return {
 	"nvim-neotest/neotest",
-	event = "VeryLazy",
-	dependencies = vim.list_extend({
+	-- event = "VeryLazy",
+	cmd = { "Neotest" },
+	dependencies = {
 		"nvim-neotest/nvim-nio",
 		"nvim-lua/plenary.nvim",
 		"nvim-treesitter/nvim-treesitter",
 		"antoinemadec/FixCursorHold.nvim",
-	}, adapter_plugins),
+	},
 
 	-- ── Keymaps ──────────────────────────────────────────────────────
 	keys = {
-		-- Group registration for which-key
 		{ "<leader>n", group = "neotest", icon = "󰙨" },
 
 		-- Run
@@ -239,7 +171,7 @@ return {
 			desc = "󰈞 Toggle watch mode",
 		},
 
-		-- Navigation (jump between failed tests)
+		-- Navigation
 		{
 			"[n",
 			function()
@@ -258,6 +190,8 @@ return {
 
 	---@type neotest.Config
 	opts = {
+		adapters = {},
+
 		status = {
 			enabled = true,
 			virtual_text = true,
@@ -333,17 +267,4 @@ return {
 			severity = vim.diagnostic.severity.ERROR,
 		},
 	},
-
-	---@param _ table Plugin spec (unused)
-	---@param opts neotest.Config Resolved options
-	config = function(_, opts)
-		-- ── Build adapters at config time (deferred require) ─────────
-		local adapters = {}
-		for _, spec in ipairs(ADAPTER_SPECS) do
-			if vim.fn.executable(spec.binary) == 1 then table.insert(adapters, spec.setup()) end
-		end
-		opts.adapters = adapters
-
-		require("neotest").setup(opts)
-	end,
 }

@@ -1,15 +1,16 @@
 ---@file lua/langs/python.lua
----@description Python — LSP, formatter, linter, treesitter, DAP & buffer-local keymaps
+---@description Python — LSP, formatter, linter, treesitter, DAP, neotest & buffer-local keymaps
 ---@module "langs.python"
 ---@author ca971
 ---@license MIT
----@version 1.0.0
+---@version 1.1.0
 ---@since 2026-01
 ---
 ---@see core.settings            Language enable/disable guard (`is_language_enabled`)
 ---@see core.keymaps             Buffer-local keymap API (`lang_group`, `lang_map`)
 ---@see core.icons               Shared icon definitions for UI consistency
 ---@see core.mini-align-registry Alignment preset registration system
+---@see plugins.code.neotest     Core neotest config (adapters = {} — populated here)
 ---@see langs.lua                Lua language support (same architecture)
 ---@see langs.rust               Rust language support (same architecture)
 ---
@@ -27,7 +28,8 @@
 --- ║  │  ├─ Linter       ruff (nvim-lint)                                │    ║
 --- ║  │  ├─ Treesitter   python · rst · toml · requirements parsers      │    ║
 --- ║  │  ├─ DAP          debugpy (via nvim-dap-python + Mason)           │    ║
---- ║  │  └─ Extras       venv-selector · neotest-python                  │    ║
+--- ║  │  ├─ Neotest      neotest-python (pytest adapter, optional)       │    ║
+--- ║  │  └─ Extras       venv-selector                                   │    ║
 --- ║  │                                                                  │    ║
 --- ║  │  Buffer-local keymaps (<leader>l prefix):                        │    ║
 --- ║  │  ├─ RUN       r  Run file             R  Run with arguments      │    ║
@@ -40,6 +42,15 @@
 --- ║  │  ├─ TOOLS     s  Sort imports         p  Pip install             │    ║
 --- ║  │  │            x  Reload module        a  Type check (mypy)       │    ║
 --- ║  │  └─ DOCS      i  Module info          h  Pydoc documentation     │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  Neotest integration:                                            │    ║
+--- ║  │  ┌──────────────────────────────────────────────────────────┐    │    ║
+--- ║  │  │  This file registers neotest-python as an adapter via    │    │    ║
+--- ║  │  │  lazy.nvim spec merging (optional = true).               │    │    ║
+--- ║  │  │  The adapter is only loaded when ft = "python" fires.    │    │    ║
+--- ║  │  │  Core neotest UI/keymaps live in plugins/code/neotest.lua│    │    ║
+--- ║  │  │  All <leader>n keymaps work once the adapter is loaded.  │    │    ║
+--- ║  │  └──────────────────────────────────────────────────────────┘    │    ║
 --- ║  │                                                                  │    ║
 --- ║  │  DAP integration flow:                                           │    ║
 --- ║  │  ┌──────────────────────────────────────────────────────────┐    │    ║
@@ -66,6 +77,11 @@
 --- ║  • .pyi, .pyw, .pyx → python                                             ║
 --- ║  • Pipfile → toml, pyproject.toml → toml                                 ║
 --- ║  • requirements*.txt → requirements                                      ║
+--- ║                                                                          ║
+--- ║  Changelog:                                                              ║
+--- ║  • 1.1.0 — Neotest adapter registered via optional spec merge pattern    ║
+--- ║            Header updated with neotest integration docs                  ║
+--- ║            Loading strategy table updated                                ║
 --- ╚══════════════════════════════════════════════════════════════════════════╝
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -624,7 +640,7 @@ end
 -- │ nvim-treesitter    │ opts merge (parsers added to ensure_installed│
 -- │ nvim-dap-python    │ ft = "python" (true lazy load)               │
 -- │ venv-selector      │ ft = "python" (true lazy load)               │
--- │ neotest-python     │ loaded with neotest (optional)               │
+-- │ neotest            │ optional = true (adapter injected via merge) │
 -- └────────────────────┴──────────────────────────────────────────────┘
 -- ═══════════════════════════════════════════════════════════════════════════
 
@@ -898,21 +914,31 @@ return {
 	},
 
 	-- ── NEOTEST (Python adapter) ───────────────────────────────────────────
-	-- Integrates pytest with neotest for inline test results, diagnostics,
-	-- and DAP-based test debugging (`justMyCode = false` for full stepping).
+	-- Registers neotest-python into the core neotest adapters list.
+	-- The adapter is only loaded when a Python file is opened.
+	-- Core neotest UI/keymaps are in plugins/code/neotest.lua.
+	--
+	-- Pattern:
+	--   optional = true   → only merges if neotest core is installed
+	--   opts function     → appends adapter to opts.adapters table
+	--   dependencies      → ensures neotest-python is available
 	-- ───────────────────────────────────────────────────────────────────────
 	{
 		"nvim-neotest/neotest",
 		optional = true,
 		dependencies = {
-			"nvim-neotest/neotest-python",
+			{ "nvim-neotest/neotest-python", lazy = true },
 		},
 		opts = function(_, opts)
 			opts.adapters = opts.adapters or {}
-			opts.adapters[#opts.adapters + 1] = require("neotest-python")({
-				dap = { justMyCode = false },
-				runner = "pytest",
-			})
+			table.insert(
+				opts.adapters,
+				require("neotest-python")({
+					dap = { justMyCode = false },
+					runner = "pytest",
+					args = { "--tb=short", "-q" },
+				})
+			)
 		end,
 	},
 }

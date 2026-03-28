@@ -610,4 +610,22 @@ return {
 			ensure_installed = { "codelldb" },
 		},
 	},
+
+	-- ── NEOTEST (Rust adapter) ────────────────────────────────────────
+	{
+		"nvim-neotest/neotest",
+		optional = true,
+		dependencies = {
+			{ "rouge8/neotest-rust", lazy = true },
+		},
+		opts = function(_, opts)
+			opts.adapters = opts.adapters or {}
+			table.insert(
+				opts.adapters,
+				require("neotest-rust")({
+					args = { "--no-capture" },
+				})
+			)
+		end,
+	},
 }

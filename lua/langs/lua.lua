@@ -916,4 +916,17 @@ return {
 			}
 		end,
 	},
+
+	-- ── NEOTEST (Lua/Plenary adapter) ─────────────────────────────────
+	{
+		"nvim-neotest/neotest",
+		optional = true,
+		dependencies = {
+			{ "nvim-neotest/neotest-plenary", lazy = true },
+		},
+		opts = function(_, opts)
+			opts.adapters = opts.adapters or {}
+			table.insert(opts.adapters, require("neotest-plenary"))
+		end,
+	},
 }
