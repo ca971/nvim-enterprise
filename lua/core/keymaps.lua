@@ -603,7 +603,7 @@ function M._register_general()
 	map("n", "X", '"_X', { desc = "Delete char back (no yank)" }, "general")
 
 	-- ── Select all ───────────────────────────────────────────────────
-	map("n", "<C-a>", "gg<S-v>G", { desc = "Select all" }, "general")
+	map("n", "<leader>A", "gg<S-v>G", { desc = "Select all" }, "general")
 
 	-- ── Paste without yanking in visual mode ─────────────────────────
 	map("x", "p", '"_dP', { desc = "Paste (no yank)" }, "general")
