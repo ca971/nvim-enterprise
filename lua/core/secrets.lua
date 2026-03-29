@@ -121,6 +121,7 @@ M.AI_KEYS = {
 	{ env = "DASHSCOPE_API_KEY", name = "Qwen", icon = "🌐" },
 	{ env = "GLM_API_KEY", name = "GLM-5", icon = "🐉" },
 	{ env = "MOONSHOT_API_KEY", name = "Kimi", icon = "🌙" },
+	{ env = "GITHUB_PERSONAL_ACCESS_TOKEN", name = "GitHub", icon = "🐙" },
 }
 
 --- Default .env file search paths (scanned in order).

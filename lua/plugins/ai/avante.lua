@@ -1,20 +1,22 @@
 ---@file lua/plugins/ai/avante.lua
----@description Avante — AI-powered code assistant with multi-provider support and auto-detection
+---@description Avante — AI-powered code assistant with multi-provider support, auto-detection and MCP integration
 ---@module "plugins.ai.avante"
 ---@author ca971
 ---@license MIT
----@version 1.0.0
+---@version 1.1.0
 ---@since 2026-01
 ---
 ---@see core.settings Settings singleton (ai.enabled, ai.avante.*, ai.provider, ai.ollama.*)
 ---@see core.icons Centralized icon definitions (UI, misc)
 ---@see plugins.ai AI plugin aggregator
 ---@see plugins.ai.codecompanion Complementary AI plugin (different UX)
+---@see plugins.ai.mcphub MCP server hub (tools provider for AI plugins)
 ---
 ---@see https://github.com/yetone/avante.nvim
+---@see https://github.com/ravitemer/mcphub.nvim
 ---
 --- ╔══════════════════════════════════════════════════════════════════════════╗
---- ║  plugins/ai/avante.lua — AI coding assistant (multi-provider)            ║
+--- ║  plugins/ai/avante.lua — AI coding assistant (multi-provider + MCP)      ║
 --- ║                                                                          ║
 --- ║  Architecture:                                                           ║
 --- ║  ┌──────────────────────────────────────────────────────────────────┐    ║
@@ -51,6 +53,19 @@
 --- ║  │  │ kimi        │ kimi-2.5             │ Vendor (OpenAI-compat)│  │    ║
 --- ║  │  │ ollama      │ qwen2.5-coder:7b     │ Vendor (local)        │  │    ║
 --- ║  │  └─────────────┴──────────────────────┴───────────────────────┘  │    ║
+--- ║  │                                                                  │    ║
+--- ║  │  MCP integration (via mcphub.nvim):                              │    ║
+--- ║  │  ┌────────────────────────────────────────────────────────────┐  │    ║
+--- ║  │  │  mcphub.nvim (optional dependency)                         │  │    ║
+--- ║  │  │  ├─ custom_tools:  MCP tools injected into Avante          │  │    ║
+--- ║  │  │  │  → AI can call tools (filesystem, fetch, github, etc.)  │  │    ║
+--- ║  │  │  ├─ system_prompt: MCP server instructions appended        │  │    ║
+--- ║  │  │  │  → AI knows which tools are available                   │  │    ║
+--- ║  │  │  └─ Slash commands from MCP servers (/mcp_*)               │  │    ║
+--- ║  │  │                                                            │  │    ║
+--- ║  │  │  Without mcphub: Avante works normally (no tools)          │  │    ║
+--- ║  │  │  With mcphub:    AI can read files, fetch URLs, query DBs  │  │    ║
+--- ║  │  └────────────────────────────────────────────────────────────┘  │    ║
 --- ║  │                                                                  │    ║
 --- ║  │  Runtime provider switching:                                     │    ║
 --- ║  │  ├─ cycle_provider()   Rotates through PROVIDERS in order        │    ║
@@ -103,6 +118,8 @@
 --- ║  ├─ Custom vendors (deepseek, qwen, glm, kimi, ollama) use               ║
 --- ║  │  __inherited_from = "openai" for OpenAI-compatible API format         ║
 --- ║  ├─ Ollama URL and model from central settings (ai.ollama.*)             ║
+--- ║  ├─ MCP tools injected via pcall — graceful degradation if mcphub        ║
+--- ║  │  is not installed (custom_tools = {}, system_prompt = nil)            ║
 --- ║  ├─ auto_set_keymaps = false — we define keymaps explicitly in keys{}    ║
 --- ║  ├─ auto_apply_diff_after_generation = false — user reviews first        ║
 --- ║  └─ file_selector uses snacks provider for consistency                   ║
@@ -113,6 +130,13 @@
 --- ║  • avante_cmd() wraps commands in pcall — safe if plugin not loaded      ║
 --- ║  • cycle_provider() reads current state from avante.config (no cache)    ║
 --- ║  • select_provider() checks env vars live for accurate ✅/❌ status      ║
+--- ║  • MCP tools loaded lazily via pcall (zero cost if mcphub absent)        ║
+--- ║                                                                          ║
+--- ║  Changelog:                                                              ║
+--- ║  • 1.1.0 — Added MCP integration via mcphub.nvim                         ║
+--- ║            custom_tools injected from MCP servers                        ║
+--- ║            system_prompt augmented with MCP tool descriptions            ║
+--- ║            mcphub added as optional dependency                           ║
 --- ╚══════════════════════════════════════════════════════════════════════════╝
 
 -- ═══════════════════════════════════════════════════════════════════════
@@ -483,6 +507,54 @@ local ollama_url = setting("ai.ollama.url", "http://localhost:11434")
 local ollama_chat_model = setting("ai.ollama.chat_model", "qwen2.5-coder:7b")
 
 -- ═══════════════════════════════════════════════════════════════════════
+-- MCP INTEGRATION
+--
+-- Builds custom_tools and system_prompt from mcphub.nvim if available.
+-- Uses pcall for graceful degradation — Avante works normally without
+-- mcphub, and gains MCP tools when mcphub is installed and configured.
+--
+-- Tool injection flow:
+--   mcphub.nvim → mcphub.extensions.avante → avante custom_tools
+--   mcphub.nvim → mcphub.extensions.avante → avante system_prompt
+--
+-- When mcphub is absent:
+--   custom_tools = {}         (no tools, no error)
+--   mcp_system_prompt = nil   (default system prompt, no augmentation)
+-- ═══════════════════════════════════════════════════════════════════════
+
+--- Build MCP custom tools for Avante.
+---
+--- Attempts to load `mcphub.extensions.avante` and extract the
+--- MCP tool definition. Returns an empty table if mcphub is not
+--- installed or not configured.
+---
+---@return table[] tools List of custom tool definitions for Avante
+---@private
+local function build_mcp_tools()
+	local mcp_ok, mcphub_avante = pcall(require, "mcphub.extensions.avante")
+	if mcp_ok and mcphub_avante and mcphub_avante.mcp_tool then return { mcphub_avante.mcp_tool() } end
+	return {}
+end
+
+--- Build MCP-augmented system prompt for Avante.
+---
+--- Attempts to load `mcphub.extensions.avante` and retrieve the
+--- prompt describing all active MCP servers and their available
+--- tools. Returns `nil` if mcphub is not available (Avante uses
+--- its default system prompt).
+---
+---@return string|nil prompt MCP-augmented system prompt, or `nil`
+---@private
+local function build_mcp_system_prompt()
+	local mcp_ok, mcphub_avante = pcall(require, "mcphub.extensions.avante")
+	if mcp_ok and mcphub_avante and mcphub_avante.get_prompt_for_active_servers then
+		local prompt_ok, prompt = pcall(mcphub_avante.get_prompt_for_active_servers)
+		if prompt_ok and prompt and prompt ~= "" then return prompt end
+	end
+	return nil
+end
+
+-- ═══════════════════════════════════════════════════════════════════════
 -- PLUGIN SPEC
 -- ═══════════════════════════════════════════════════════════════════════
 
@@ -498,6 +570,16 @@ return {
 		"nvim-lua/plenary.nvim",
 		"MunifTanjim/nui.nvim",
 		"nvim-mini/mini.icons",
+
+		-- ── MCP integration ──────────────────────────────────────
+		-- Optional: when installed, MCP tools are injected into
+		-- Avante via custom_tools and system_prompt augmentation.
+		-- When absent, Avante works normally without tools.
+		{
+			"ravitemer/mcphub.nvim",
+			optional = true,
+		},
+
 		{
 			"MeanderingProgrammer/render-markdown.nvim",
 			optional = true,
@@ -751,5 +833,22 @@ return {
 			provider = "snacks",
 			provider_opts = {},
 		},
+
+		-- ── MCP Tools ────────────────────────────────────────────────
+		-- Injected from mcphub.nvim via its avante extension.
+		-- When mcphub is installed and configured, AI can use tools
+		-- like filesystem access, HTTP fetch, GitHub API, etc.
+		-- When mcphub is absent, this resolves to {} (no tools).
+		--
+		-- Tools become available as slash commands in the Avante chat
+		-- and the AI can call them autonomously based on context.
+		custom_tools = build_mcp_tools(),
+
+		-- ── System Prompt (MCP-augmented) ────────────────────────────
+		-- When mcphub is active, appends descriptions of all running
+		-- MCP servers and their available tools to the system prompt.
+		-- This lets the AI know which tools it can call.
+		-- When mcphub is absent, this is nil (Avante uses its default).
+		system_prompt = build_mcp_system_prompt(),
 	},
 }

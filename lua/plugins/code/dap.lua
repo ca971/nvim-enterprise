@@ -1,5 +1,14 @@
 ---@file lua/plugins/code/dap.lua
 ---@description DAP (Debug Adapter Protocol) — full debugging environment
+---@module "plugins.code.dap"
+---@author ca971
+---@license MIT
+---@version 1.1.0
+---@since 2026-01
+---
+---@see core.settings            Language enable/disable guard (`is_language_enabled`)
+---@see core.keymaps             Buffer-local keymap API (`lang_group`, `lang_map`)
+---@see core.icons               Shared icon definitions for UI consistency
 ---
 --- ╔══════════════════════════════════════════════════════════════════════════╗
 --- ║  plugins/code/dap.lua — Debug Adapter Protocol                           ║
