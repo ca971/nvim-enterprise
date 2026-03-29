@@ -136,9 +136,9 @@ local RUNTIME_EXECUTABLES = {
 	rust = "rustc",
 	scala = "scala",
 	terraform = "terraform",
-	vim = "vim",
+	-- vim = "vim",
 	zig = "zig",
-	zsh = "zsh",
+	-- zsh = "zsh",
 }
 
 -- ═══════════════════════════════════════════════════════════════════════
