@@ -115,6 +115,7 @@ local Platform = Class:extend("Platform") --[[@as Platform]]
 local RUNTIME_EXECUTABLES = {
 	-- bash = "bash",
 	-- cpp = "c++",
+	elixir = "elixir",
 	dart = "dart",
 	-- gcc = "gcc",
 	go = "go",
